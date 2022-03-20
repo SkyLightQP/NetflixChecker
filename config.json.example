@@ -1,0 +1,15 @@
+{
+  "discord": {
+    "token": "",
+    "owner": ""
+  },
+  "bank": {
+    "cost": 0,
+    "id": "",
+    "password": ""
+  },
+  "account": {
+    "id": "",
+    "password": ""
+  }
+}
