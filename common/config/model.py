@@ -10,5 +10,4 @@ class ConfigModel:
     bank_id: str
     bank_password: str
 
-    account_id: str
     account_password: str

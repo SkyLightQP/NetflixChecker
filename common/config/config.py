@@ -22,7 +22,6 @@ class Config:
                                       bank_cost=data['bank']['cost'],
                                       bank_id=data['bank']['id'],
                                       bank_password=data['bank']['password'],
-                                      account_id=data['account']['id'],
                                       account_password=data['account']['password']
                                       )
         return self.config
