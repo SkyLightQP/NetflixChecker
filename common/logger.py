@@ -1,8 +1,12 @@
 import logging
 
+from selenium.webdriver.remote.remote_connection import LOGGER
+
+LOGGER.setLevel(logging.WARNING)
+
 logger = logging.getLogger()
 stream_handler = logging.StreamHandler()
-file_handler = logging.FileHandler(filename="app.log")
+file_handler = logging.FileHandler(filename="app.log", encoding='utf-8')
 
 formatter = logging.Formatter(fmt='%(asctime)s [%(levelname)s] %(message)s')
 
