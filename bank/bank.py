@@ -21,6 +21,8 @@ class Bank:
 
     def __init__(self, bank_id, bank_password, account_password, bank_cost, executable_path='chromedriver'):
         chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('headless')
+        chrome_options.add_argument("disable-gpu")
         chrome_options.add_experimental_option("mobileEmulation", {"deviceName": "Galaxy S5"})
 
         driver = webdriver.Chrome(executable_path=executable_path, options=chrome_options)

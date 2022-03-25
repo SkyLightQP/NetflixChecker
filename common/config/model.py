@@ -6,7 +6,7 @@ class ConfigModel:
     discord_token: str
     discord_owner: str
 
-    bank_cost: int
+    bank_cost: str
     bank_id: str
     bank_password: str
 
