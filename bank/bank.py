@@ -19,7 +19,7 @@ ButtonType = Literal["shift", "char", "normal"]
 class Bank:
     __data: List[BankData] = []
 
-    def __init__(self, bank_id, bank_password, account_password, executable_path='chromedriver'):
+    def __init__(self, bank_id, bank_password, account_password, bank_cost, executable_path='chromedriver'):
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_experimental_option("mobileEmulation", {"deviceName": "Galaxy S5"})
 
@@ -31,6 +31,7 @@ class Bank:
         self.bank_id = bank_id
         self.bank_password = bank_password
         self.account_password = account_password
+        self.bank_cost = bank_cost
 
     def __clickButton(self, type: ButtonType, value):
         if type == "shift":
@@ -95,7 +96,7 @@ class Bank:
             cost = bs.select_one('#wq_uuid_61 > span').get_text()
             who = bs.select_one('#wq_uuid_66 > span').get_text()
 
-            if cost != 0:
+            if cost != 0 and cost == self.bank_cost:
                 self.__data.append(BankData(ttime, date, cost, who))
 
             self.driver.find_element(By.XPATH, '//*[@id="btn_목록보기"]').click()
