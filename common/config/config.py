@@ -19,6 +19,7 @@ class Config:
         if self.config is None:
             self.config = ConfigModel(discord_token=data['discord']['token'],
                                       discord_owner=data['discord']['owner'],
+                                      discord_channel=data['discord']['channel'],
                                       bank_cost=data['bank']['cost'],
                                       bank_id=data['bank']['id'],
                                       bank_password=data['bank']['password'],

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 class ConfigModel:
     discord_token: str
     discord_owner: str
+    discord_channel: str
 
     bank_cost: str
     bank_id: str

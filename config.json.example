@@ -1,7 +1,8 @@
 {
   "discord": {
     "token": "",
-    "owner": ""
+    "owner": "",
+    "channel": ""
   },
   "bank": {
     "cost": 0,
