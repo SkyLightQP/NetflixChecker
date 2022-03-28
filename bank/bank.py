@@ -13,7 +13,6 @@ from .model import BankModel
 
 BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
 ONLY_UPPERCASE = re.compile("\b[A-Z]\b")
-
 ButtonType = Literal["shift", "char", "normal"]
 
 
