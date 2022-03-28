@@ -9,15 +9,16 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from common.logger import logger
-from .bank_data import BankData
+from .model import BankModel
 
 BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
 ONLY_UPPERCASE = re.compile("\b[A-Z]\b")
 
 ButtonType = Literal["shift", "char", "normal"]
 
+
 class Bank:
-    __data: List[BankData] = []
+    __data: List[BankModel] = []
 
     def __init__(self, bank_id, bank_password, account_password, bank_cost, executable_path='chromedriver'):
         chrome_options = webdriver.ChromeOptions()
@@ -79,7 +80,7 @@ class Bank:
             self.__clickButton("normal", i)
             time.sleep(0.1)
 
-        self.driver.find_element(By.XPATH, '//*[@id="wfr_searchCalendar_rad_gigan"]/div[3]').click() # 1주일
+        self.driver.find_element(By.XPATH, '//*[@id="wfr_searchCalendar_rad_gigan"]/div[3]').click()  # 1주일
         self.driver.find_element(By.XPATH, '//*[@id="btn_조회"]').click()
 
         logger.info('[BANK] Select bank account successfully.')
@@ -99,7 +100,7 @@ class Bank:
             who = bs.select_one('#wq_uuid_66 > span').get_text()
 
             if cost != 0 and cost == self.bank_cost:
-                self.__data.append(BankData(ttime, date, cost, who))
+                self.__data.append(BankModel(ttime, date, cost, who))
 
             self.driver.find_element(By.XPATH, '//*[@id="btn_목록보기"]').click()
             self.driver.switch_to.default_content()
@@ -116,5 +117,5 @@ class Bank:
             logger.error('[BANK] 은행 크롤링을 실패했습니다. 다시 시도해주세요.')
             self.driver.quit()
 
-    def getData(self) -> List[BankData]:
+    def getData(self) -> List[BankModel]:
         return self.__data
