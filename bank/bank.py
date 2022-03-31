@@ -60,6 +60,16 @@ class Bank:
                 self.__clickButton("shift", i)
             elif i == '*':
                 self.__clickButton("char", "별표")
+            elif i == '!':
+                self.__clickButton("char", "느낌표")
+            elif i == '?':
+                self.__clickButton("char", "물음표")
+            elif i == '~':
+                self.__clickButton("char", "물결표시")
+            elif i == '#':
+                self.__clickButton("char", "우물정")
+            elif i == '@':
+                self.__clickButton("char", "골뱅이")
             else:
                 self.__clickButton("normal", i)
             time.sleep(0.1)
