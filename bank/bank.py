@@ -35,6 +35,8 @@ class Bank:
         self.account_password = account_password
         self.bank_cost = bank_cost
 
+        self.retry = 0
+
     def __clickButton(self, type: ButtonType, value):
         if type == "shift":
             self.driver.find_element(By.XPATH, "//img[@alt='쉬프트']").find_element(By.XPATH, "./../..").click()
@@ -113,8 +115,14 @@ class Bank:
             self.__refresh()
             self.driver.quit()
         except:
-            logger.error('[BANK] 은행 크롤링을 실패했습니다. 다시 시도해주세요.')
-            self.driver.quit()
+            if self.retry == 3:
+                logger.error(f'[BANK] 은행 크롤링을 실패했습니다.')
+                self.driver.quit()
+                exit(0)
+
+            self.retry += 1
+            logger.warn(f'[BANK] 은행 크롤링을 실패했습니다. 다시 시도합니다. ({self.retry})')
+            self.fetchData()
 
     def getData(self) -> List[BankModel]:
         return self.__data
