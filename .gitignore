@@ -1,5 +1,6 @@
 chromedriver.exe
 config.json
+data.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
