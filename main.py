@@ -9,7 +9,8 @@ from common.config import Config
 def run():
     config = Config().getConfigModel()
 
-    bank = Bank(config.bank_id, config.bank_password, config.account_password, config.bank_cost)
+    bank = Bank(config.bank_id, config.bank_password, config.account_password, config.bank_cost,
+                config.remotedriver_enable, config.remotedriver_host)
     bank.fetchData()
 
     connection = sqlite3.connect('data.db')

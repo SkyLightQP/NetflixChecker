@@ -19,13 +19,16 @@ ButtonType = Literal["shift", "char", "normal"]
 class Bank:
     __data: List[BankModel] = []
 
-    def __init__(self, bank_id, bank_password, account_password, bank_cost, executable_path=r"chromedriver"):
+    def __init__(self, bank_id, bank_password, account_password, bank_cost, use_remotedriver, remotedriver_host):
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("headless")
         chrome_options.add_argument("disable-gpu")
         chrome_options.add_experimental_option("mobileEmulation", {"deviceName": "Galaxy S5"})
 
-        driver = webdriver.Chrome(executable_path=executable_path, options=chrome_options)
+        if use_remotedriver:
+            driver = webdriver.Remote(remotedriver_host, chrome_options.to_capabilities())
+        else:
+            driver = webdriver.Chrome(executable_path="chromedriver", options=chrome_options)
         driver.get(BANK_URL)
         driver.implicitly_wait(5)
 

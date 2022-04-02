@@ -12,3 +12,6 @@ class ConfigModel:
     bank_password: str
 
     account_password: str
+
+    remotedriver_enable: bool
+    remotedriver_host: str
