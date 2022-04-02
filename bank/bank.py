@@ -19,9 +19,9 @@ ButtonType = Literal["shift", "char", "normal"]
 class Bank:
     __data: List[BankModel] = []
 
-    def __init__(self, bank_id, bank_password, account_password, bank_cost, executable_path='chromedriver'):
+    def __init__(self, bank_id, bank_password, account_password, bank_cost, executable_path=r"chromedriver"):
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('headless')
+        chrome_options.add_argument("headless")
         chrome_options.add_argument("disable-gpu")
         chrome_options.add_experimental_option("mobileEmulation", {"deviceName": "Galaxy S5"})
 
