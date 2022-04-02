@@ -11,7 +11,7 @@ file_handler = logging.FileHandler(filename="app.log", encoding='utf-8')
 formatter = logging.Formatter(fmt='%(asctime)s [%(levelname)s] %(message)s')
 
 logger.setLevel(logging.DEBUG)
-stream_handler.setLevel(logging.DEBUG)
+stream_handler.setLevel(logging.INFO)
 file_handler.setLevel(logging.INFO)
 
 stream_handler.setFormatter(formatter)
