@@ -1,4 +1,4 @@
-# NetflixChecker (넷플릭스가웨이브를왓챠로티빙) ![works badge](https://cdn.jsdelivr.net/gh/nikku/works-on-my-machine@v0.2.0/badge.svg)
+# NetflixChecker ![works badge](https://cdn.jsdelivr.net/gh/nikku/works-on-my-machine@v0.2.0/badge.svg)
 
 넷플릭스 입금 확인을 대신 해줄거에요.
 
