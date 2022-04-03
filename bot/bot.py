@@ -22,6 +22,8 @@ class Bot(commands.Bot):
 
     @tasks.loop(hours=4)
     async def checkAccountLog(self):
+        self.bank.fetchData()
+
         channel = discord.utils.get(self.get_all_channels(), id=int(self.channel_id))
         for i in self.bank.getData():
             cur = self.connection.cursor()
