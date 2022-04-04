@@ -9,10 +9,11 @@ from common import logger, Config
 
 
 class Bot(commands.Bot):
+    config = Config().getConfigModel()
+
     def __init__(self, connection: Connection, **options):
         super().__init__(**options)
         self.connection = connection
-        self.config = Config().getConfigModel()
 
     async def on_ready(self):
         logger.info("Start discord bot successfully.")
@@ -22,8 +23,7 @@ class Bot(commands.Bot):
 
     @tasks.loop(hours=4)
     async def checkAccountLog(self):
-        bank = Bank(self.config.bank_id, self.config.bank_password, self.config.account_password, self.config.bank_cost,
-                    self.config.remotedriver_enable, self.config.remotedriver_host)
+        bank = Bank()
         bank.fetchData()
 
         channel = discord.utils.get(self.get_all_channels(), id=int(self.config.discord_channel))

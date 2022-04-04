@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from common.logger import logger
+from common import logger, Config
 from .model import BankModel
 
 BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
@@ -20,25 +20,26 @@ MAX_RETRY = 3
 
 class Bank:
     __data: List[BankModel] = []
+    config = Config().getConfigModel()
 
-    def __init__(self, bank_id, bank_password, account_password, bank_cost, use_remotedriver, remotedriver_host):
+    def __init__(self):
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("headless")
         chrome_options.add_argument("disable-gpu")
         chrome_options.add_experimental_option("mobileEmulation", {"deviceName": "Galaxy S5"})
 
-        if use_remotedriver:
-            driver = webdriver.Remote(remotedriver_host, chrome_options.to_capabilities())
+        if self.config.remotedriver_enable:
+            driver = webdriver.Remote(self.config.remotedriver_host, chrome_options.to_capabilities())
         else:
             driver = webdriver.Chrome(executable_path="chromedriver", options=chrome_options)
         driver.get(BANK_URL)
         driver.implicitly_wait(5)
 
         self.driver = driver
-        self.bank_id = bank_id
-        self.bank_password = bank_password
-        self.account_password = account_password
-        self.bank_cost = bank_cost
+        self.bank_id = self.config.bank_id
+        self.bank_password = self.config.bank_password
+        self.account_password = self.config.account_password
+        self.bank_cost = self.config.bank_cost
 
         self.retry = 0
 
