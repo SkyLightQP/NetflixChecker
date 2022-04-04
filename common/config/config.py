@@ -14,7 +14,7 @@ class Config:
         with open(self.file_name, 'rt') as file:
             return json.load(file)
 
-    def getConfigModel(self):
+    def getConfigModel(self) -> ConfigModel:
         data = self.readFile()
         if self.config is None:
             self.config = ConfigModel(discord_token=data['discord']['token'],

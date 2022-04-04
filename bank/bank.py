@@ -4,6 +4,7 @@ from typing import List, Literal
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -14,6 +15,7 @@ from .model import BankModel
 BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
 ONLY_UPPERCASE = re.compile("\b[A-Z]\b")
 ButtonType = Literal["shift", "char", "normal"]
+MAX_RETRY = 3
 
 
 class Bank:
@@ -80,7 +82,7 @@ class Bank:
         self.driver.find_element(By.XPATH, '//*[@id="mtk_done"]').click()
         self.driver.find_element(By.ID, 'btn_idLogin').click()
 
-        logger.info('[BANK] Completed login successfully.')
+        logger.info("[BANK] Completed login successfully.")
 
     def __selectAccount(self):
         WebDriverWait(self.driver, 200).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="wq_uuid_852"]')))
@@ -97,7 +99,7 @@ class Bank:
         self.driver.find_element(By.XPATH, '//*[@id="wfr_searchCalendar_rad_gigan"]/div[3]').click()  # 1주일
         self.driver.find_element(By.XPATH, '//*[@id="btn_조회"]').click()
 
-        logger.info('[BANK] Select bank account successfully.')
+        logger.info("[BANK] Select bank account successfully.")
 
     def __refresh(self):
         self.__data = []
@@ -119,7 +121,7 @@ class Bank:
             self.driver.find_element(By.XPATH, '//*[@id="btn_목록보기"]').click()
             self.driver.switch_to.default_content()
 
-        logger.info(f'[BANK] Fetch bank account successfully. length={len(self.__data)}')
+        logger.info(f"[BANK] Fetch bank account successfully. length={len(self.__data)}")
 
     def fetchData(self):
         try:
@@ -127,14 +129,13 @@ class Bank:
             self.__selectAccount()
             self.__refresh()
             self.driver.quit()
-        except:
-            if self.retry == 3:
-                logger.error(f'[BANK] 은행 크롤링을 실패했습니다.')
+        except WebDriverException as ex:
+            if self.retry == MAX_RETRY:
+                logger.error(f"[BANK] 은행 크롤링을 실패했습니다. {ex.stacktrace}")
                 self.driver.quit()
                 exit(0)
-
             self.retry += 1
-            logger.warn(f'[BANK] 은행 크롤링을 실패했습니다. 다시 시도합니다. ({self.retry})')
+            logger.warn(f"[BANK] 은행 크롤링을 실패했습니다. 다시 시도합니다. ({self.retry}/{MAX_RETRY})")
             self.fetchData()
 
     def getData(self) -> List[BankModel]:
