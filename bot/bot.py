@@ -43,4 +43,5 @@ class Bot(commands.Bot):
                 self.connection.commit()
                 count += 1
 
-        logger.info(f"Found new account {count} logs. ")
+        if count > 0:
+            logger.info(f"Found new account {count} logs.")
