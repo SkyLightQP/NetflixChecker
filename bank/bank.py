@@ -16,6 +16,7 @@ BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
 ONLY_UPPERCASE = re.compile("\b[A-Z]\b")
 ButtonType = Literal["shift", "char", "normal"]
 MAX_RETRY = 3
+BUTTON_DELAY = 0.2
 
 
 class Bank:
@@ -46,11 +47,15 @@ class Bank:
     def __clickButton(self, type: ButtonType, value):
         if type == "shift":
             self.driver.find_element(By.XPATH, "//img[@alt='쉬프트']").find_element(By.XPATH, "./../..").click()
+            time.sleep(0.1)
             self.driver.find_element(By.XPATH, f"//img[@alt='대문자{value}']").find_element(By.XPATH, "./../..").click()
+            time.sleep(0.1)
             self.driver.find_element(By.XPATH, "//img[@alt='쉬프트']").find_element(By.XPATH, "./../..").click()
         if type == "char":
             self.driver.find_element(By.XPATH, "//img[@alt='특수키']").find_element(By.XPATH, "./../..").click()
+            time.sleep(0.1)
             self.driver.find_element(By.XPATH, f"//img[@alt='{value}']").find_element(By.XPATH, "./../..").click()
+            time.sleep(0.1)
             self.driver.find_element(By.XPATH, "//img[@alt='특수키']").find_element(By.XPATH, "./../..").click()
         if type == "normal":
             self.driver.find_element(By.XPATH, f"//img[@alt='{value}']").find_element(By.XPATH, "./../..").click()
@@ -78,7 +83,7 @@ class Bank:
                 self.__clickButton("char", "골뱅이")
             else:
                 self.__clickButton("normal", i)
-            time.sleep(0.1)
+            time.sleep(BUTTON_DELAY)
 
         self.driver.find_element(By.XPATH, '//*[@id="mtk_done"]').click()
         self.driver.find_element(By.ID, 'btn_idLogin').click()
@@ -86,8 +91,6 @@ class Bank:
         logger.info("[BANK] Completed login successfully.")
 
     def __selectAccount(self):
-        WebDriverWait(self.driver, 200).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="wq_uuid_852"]')))
-
         self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_852"]').click()
         self.driver.find_element(By.XPATH, '//*[@id="sbx_accno_input_0"]/option[2]').click()
 
@@ -95,7 +98,7 @@ class Bank:
 
         for i in self.account_password:
             self.__clickButton("normal", i)
-            time.sleep(0.1)
+            time.sleep(BUTTON_DELAY)
 
         self.driver.find_element(By.XPATH, '//*[@id="wfr_searchCalendar_rad_gigan"]/div[3]').click()  # 1주일
         self.driver.find_element(By.XPATH, '//*[@id="btn_조회"]').click()
