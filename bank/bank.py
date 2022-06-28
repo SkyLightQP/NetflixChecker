@@ -136,10 +136,10 @@ class Bank:
             logger.info(f"[BANK] Fetched bank data successfully. length={len(self.__data)}")
         except WebDriverException as ex:
             if self.retry == MAX_RETRY:
-                logger.error(f"[BANK] 은행 크롤링을 실패했습니다. 더 이상 시도하지 않습니다. {ex.stacktrace}")
+                logger.error(f"[BANK] Failed during bank crawling. do not try anymore. {ex.stacktrace}")
                 return
             self.retry += 1
-            logger.warn(f"[BANK] 은행 크롤링을 실패했습니다. 다시 시도합니다. ({self.retry}/{MAX_RETRY})")
+            logger.warn(f"[BANK] Failed during bank crawling. retry ({self.retry}/{MAX_RETRY})")
             self.refresh()
 
     def getData(self) -> List[BankModel]:
