@@ -1,13 +1,12 @@
 import re
 import time
-from typing import List, Literal
-
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from typing import List, Literal
 
 from common import logger, Config
 from .model import BankModel
@@ -60,7 +59,9 @@ class Bank:
         if type == "normal":
             self.driver.find_element(By.XPATH, f"//img[@alt='{value}']").find_element(By.XPATH, "./../..").click()
 
-    def __login(self):
+    def login(self):
+        logger.info("[BANK] Start bank login.")
+
         WebDriverWait(self.driver, 200).until(EC.element_to_be_clickable((By.ID, 'btn_idLogin')))
 
         self.driver.find_element(By.XPATH, '//*[@id="ibx_loginId"]').send_keys(self.bank_id)
@@ -90,7 +91,9 @@ class Bank:
 
         logger.info("[BANK] Completed login successfully.")
 
-    def __selectAccount(self):
+    def selectAccount(self):
+        logger.info("[BANK] Start select bank account.")
+
         self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_852"]').click()
         self.driver.find_element(By.XPATH, '//*[@id="sbx_accno_input_0"]/option[2]').click()
 
@@ -103,44 +106,40 @@ class Bank:
         self.driver.find_element(By.XPATH, '//*[@id="wfr_searchCalendar_rad_gigan"]/div[3]').click()  # 1주일
         self.driver.find_element(By.XPATH, '//*[@id="btn_조회"]').click()
 
-        logger.info("[BANK] Select bank account successfully.")
+        logger.info("[BANK] Selected bank account successfully.")
 
-    def __refresh(self):
-        self.__data = []
-        original = self.driver.find_elements(By.CSS_SELECTOR, '#F01_grd_list_body_tbody > tr')
-        for i in range(0, len(original)):
-            self.driver.find_element(By.XPATH, f'//*[@id="F01_grd_list_cell_{i}_11"]/nobr/a').click()
-            self.driver.switch_to.frame(self.driver.find_element(By.XPATH, '/html/body/div[7]/div[2]/div[1]/iframe'))
-            html = self.driver.find_element(By.XPATH, '//*[@id="M01_gen0"]').get_attribute('innerHTML')
-
-            bs = BeautifulSoup(html, 'html.parser')
-            date = bs.select_one('#wq_uuid_41 > span').get_text()
-            ttime = bs.select_one('#wq_uuid_46 > span').get_text()
-            cost = bs.select_one('#wq_uuid_61 > span').get_text()
-            who = bs.select_one('#wq_uuid_66 > span').get_text()
-
-            if cost != 0 and cost == self.bank_cost:
-                self.__data.append(BankModel(ttime, date, cost, who))
-
-            self.driver.find_element(By.XPATH, '//*[@id="btn_목록보기"]').click()
-            self.driver.switch_to.default_content()
-
-        logger.info(f"[BANK] Fetch bank account successfully. length={len(self.__data)}")
-
-    def fetchData(self):
+    def refresh(self):
         try:
-            self.__login()
-            self.__selectAccount()
-            self.__refresh()
-            self.driver.quit()
+            logger.info(f"[BANK] Fetch bank data of account.")
+
+            self.__data = []
+            original = self.driver.find_elements(By.CSS_SELECTOR, '#F01_grd_list_body_tbody > tr')
+            for i in range(0, len(original)):
+                self.driver.find_element(By.XPATH, f'//*[@id="F01_grd_list_cell_{i}_11"]/nobr/a').click()
+                self.driver.switch_to.frame(
+                    self.driver.find_element(By.XPATH, '/html/body/div[7]/div[2]/div[1]/iframe'))
+                html = self.driver.find_element(By.XPATH, '//*[@id="M01_gen0"]').get_attribute('innerHTML')
+
+                bs = BeautifulSoup(html, 'html.parser')
+                date = bs.select_one('#wq_uuid_41 > span').get_text()
+                ttime = bs.select_one('#wq_uuid_46 > span').get_text()
+                cost = bs.select_one('#wq_uuid_61 > span').get_text()
+                who = bs.select_one('#wq_uuid_66 > span').get_text()
+
+                if cost != 0 and cost == self.bank_cost:
+                    self.__data.append(BankModel(ttime, date, cost, who))
+
+                self.driver.find_element(By.XPATH, '//*[@id="btn_목록보기"]').click()
+                self.driver.switch_to.default_content()
+
+            logger.info(f"[BANK] Fetched bank data successfully. length={len(self.__data)}")
         except WebDriverException as ex:
             if self.retry == MAX_RETRY:
-                logger.error(f"[BANK] 은행 크롤링을 실패했습니다. {ex.stacktrace}")
-                self.driver.quit()
-                exit(0)
+                logger.error(f"[BANK] 은행 크롤링을 실패했습니다. 더 이상 시도하지 않습니다. {ex.stacktrace}")
+                return
             self.retry += 1
             logger.warn(f"[BANK] 은행 크롤링을 실패했습니다. 다시 시도합니다. ({self.retry}/{MAX_RETRY})")
-            self.fetchData()
+            self.refresh()
 
     def getData(self) -> List[BankModel]:
         return self.__data

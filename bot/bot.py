@@ -14,21 +14,26 @@ class Bot(commands.Bot):
     def __init__(self, connection: Connection, **options):
         super().__init__(**options)
         self.connection = connection
+        self.bank = Bank()
 
     async def on_ready(self):
         logger.info("Start discord bot successfully.")
 
+        self.bank.login()
+        self.bank.selectAccount()
+
         self.checkAccountLog.start()
         logger.info("Register schedule job for bank alert.")
 
+
+
     @tasks.loop(hours=4)
     async def checkAccountLog(self):
-        bank = Bank()
-        bank.fetchData()
+        self.bank.refresh()
 
         channel = discord.utils.get(self.get_all_channels(), id=int(self.config.discord_channel))
         count = 0
-        for i in bank.getData():
+        for i in self.bank.getData():
             cur = self.connection.cursor()
             cur.execute(f"SELECT * FROM data WHERE date='{i.date}' and name='{i.who}';")
 
