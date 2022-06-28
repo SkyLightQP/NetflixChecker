@@ -1,4 +1,3 @@
-from datetime import datetime
 from sqlite3 import Connection
 
 import discord
@@ -38,8 +37,8 @@ class Bot(commands.Bot):
             if cur.fetchone() is None:
                 embed = discord.Embed(title=f"입금 확인 ({i.who})",
                                       description=f"넷플릭스 {i.cost}원 입금 확인",
-                                      color=0xF93A2F,
-                                      timestamp=datetime.strptime(f"{i.date} {i.time}", "%Y-%m-%d %H:%M:%S"))
+                                      color=0xF93A2F)
+                embed.set_footer(text=f"{i.date} {i.time}")
                 await channel.send(embed=embed)
                 insert_cur = self.connection.cursor()
                 insert_cur.execute(f"INSERT INTO data VALUES ('{i.date}', '{i.who}');")
