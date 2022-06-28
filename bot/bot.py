@@ -25,8 +25,6 @@ class Bot(commands.Bot):
         self.checkAccountLog.start()
         logger.info("Register schedule job for bank alert.")
 
-
-
     @tasks.loop(hours=4)
     async def checkAccountLog(self):
         self.bank.refresh()

@@ -1,12 +1,13 @@
 import re
 import time
+from typing import List, Literal
+
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from typing import List, Literal
 
 from common import logger, Config
 from .model import BankModel
