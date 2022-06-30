@@ -5,6 +5,6 @@ WORKDIR /workspace
 
 RUN pip install -r requirements.txt
 
-VOLUME ["/workspace/app.log", "/workspace/config.json", "/workspace/data.db", "/workspace/chromedriver"]
+VOLUME ["/workspace/app.log", "/workspace/config.json", "/workspace/data.db", "/workspace/chromedriver", "/workspace/error/"]
 
 CMD ["python", "main.py"]
