@@ -10,12 +10,12 @@ class Config:
     def __init__(self, file_name="config.json"):
         self.file_name = file_name
 
-    def readFile(self):
+    def read_file(self):
         with open(self.file_name, 'rt') as file:
             return json.load(file)
 
-    def getConfigModel(self) -> ConfigModel:
-        data = self.readFile()
+    def get_config_model(self) -> ConfigModel:
+        data = self.read_file()
         if self.config is None:
             self.config = ConfigModel(discord_token=data['discord']['token'],
                                       discord_owner=data['discord']['owner'],

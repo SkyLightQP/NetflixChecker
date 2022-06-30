@@ -6,7 +6,7 @@ from common.config import Config
 
 
 def run():
-    config = Config().getConfigModel()
+    config = Config().get_config_model()
 
     connection = sqlite3.connect('data.db')
 

@@ -8,7 +8,7 @@ from common import logger, Config
 
 
 class Bot(commands.Bot):
-    config = Config().getConfigModel()
+    config = Config().get_config_model()
 
     def __init__(self, connection: Connection, **options):
         super().__init__(**options)
@@ -19,20 +19,20 @@ class Bot(commands.Bot):
         logger.info("Start discord bot successfully.")
 
         self.bank.login()
-        self.bank.selectAccount()
+        self.bank.select_account()
         logger.info("Initialize bank account.")
 
-        self.checkAccountLog.start()
-        self.renewalLogin.start()
+        self.check_account_log_job.start()
+        self.renewal_login_job.start()
         logger.info("Register schedule job.")
 
     @tasks.loop(hours=4)
-    async def checkAccountLog(self):
+    async def check_account_log_job(self):
         self.bank.refresh()
 
         channel = discord.utils.get(self.get_all_channels(), id=int(self.config.discord_channel))
         count = 0
-        for i in self.bank.getData():
+        for i in self.bank.get_data():
             cur = self.connection.cursor()
             cur.execute(f"SELECT * FROM data WHERE date='{i.date}' and name='{i.who}';")
 
@@ -51,5 +51,5 @@ class Bot(commands.Bot):
             logger.info(f"Found new account {count} logs.")
 
     @tasks.loop(minutes=8)
-    async def renewalLogin(self):
+    async def renewal_login_job(self):
         self.bank.renewal()

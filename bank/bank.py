@@ -22,7 +22,7 @@ BUTTON_DELAY = 0.2
 
 class Bank:
     __data: List[BankModel] = []
-    config = Config().getConfigModel()
+    config = Config().get_config_model()
 
     def __init__(self):
         chrome_options = webdriver.ChromeOptions()
@@ -45,7 +45,7 @@ class Bank:
 
         self.retry = 0
 
-    def __clickButton(self, type: ButtonType, value):
+    def __click_button(self, type: ButtonType, value):
         if type == "shift":
             self.driver.find_element(By.XPATH, "//img[@alt='쉬프트']").find_element(By.XPATH, "./../..").click()
             time.sleep(0.1)
@@ -71,21 +71,21 @@ class Bank:
 
         for i in self.bank_password:
             if i.isupper():
-                self.__clickButton("shift", i)
+                self.__click_button("shift", i)
             elif i == '*':
-                self.__clickButton("char", "별표")
+                self.__click_button("char", "별표")
             elif i == '!':
-                self.__clickButton("char", "느낌표")
+                self.__click_button("char", "느낌표")
             elif i == '?':
-                self.__clickButton("char", "물음표")
+                self.__click_button("char", "물음표")
             elif i == '~':
-                self.__clickButton("char", "물결표시")
+                self.__click_button("char", "물결표시")
             elif i == '#':
-                self.__clickButton("char", "우물정")
+                self.__click_button("char", "우물정")
             elif i == '@':
-                self.__clickButton("char", "골뱅이")
+                self.__click_button("char", "골뱅이")
             else:
-                self.__clickButton("normal", i)
+                self.__click_button("normal", i)
             time.sleep(BUTTON_DELAY)
 
         self.driver.find_element(By.XPATH, '//*[@id="mtk_done"]').click()
@@ -93,7 +93,7 @@ class Bank:
 
         logger.info("[BANK] Completed login successfully.")
 
-    def selectAccount(self):
+    def select_account(self):
         logger.info("[BANK] Start select bank account.")
 
         self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_852"]').click()
@@ -102,7 +102,7 @@ class Bank:
         self.driver.find_element(By.XPATH, '//*[@id="계좌비밀번호"]').click()
 
         for i in self.account_password:
-            self.__clickButton("normal", i)
+            self.__click_button("normal", i)
             time.sleep(BUTTON_DELAY)
 
         self.driver.find_element(By.XPATH, '//*[@id="wfr_searchCalendar_rad_gigan"]/div[3]').click()  # 1주일
@@ -151,5 +151,5 @@ class Bank:
         self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_1126"]').click()
         logger.info(f"[BANK] Renewed login successfully.")
 
-    def getData(self) -> List[BankModel]:
+    def get_data(self) -> List[BankModel]:
         return self.__data
