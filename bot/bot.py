@@ -20,9 +20,11 @@ class Bot(commands.Bot):
 
         self.bank.login()
         self.bank.selectAccount()
+        logger.info("Initialize bank account.")
 
         self.checkAccountLog.start()
-        logger.info("Register schedule job for bank alert.")
+        self.renewalLogin.start()
+        logger.info("Register schedule job.")
 
     @tasks.loop(hours=4)
     async def checkAccountLog(self):
@@ -47,3 +49,7 @@ class Bot(commands.Bot):
 
         if count > 0:
             logger.info(f"Found new account {count} logs.")
+
+    @tasks.loop(minutes=8)
+    async def renewalLogin(self):
+        self.bank.renewal()

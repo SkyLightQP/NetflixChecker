@@ -136,11 +136,18 @@ class Bank:
             logger.info(f"[BANK] Fetched bank data successfully. length={len(self.__data)}")
         except WebDriverException as ex:
             if self.retry == MAX_RETRY:
-                logger.error(f"[BANK] Failed during bank crawling. do not try anymore. {ex.stacktrace}")
+                logger.error(f"[BANK] Failed during bank crawling. do not try anymore. {ex.msg}")
                 return
             self.retry += 1
             logger.warn(f"[BANK] Failed during bank crawling. retry ({self.retry}/{MAX_RETRY})")
             self.refresh()
+
+    def renewal(self):
+        logger.info(f"[BANK] Renewal login.")
+        self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_1118"]').click()
+        self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_1139"]').click()
+        self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_1126"]').click()
+        logger.info(f"[BANK] Renewed login successfully.")
 
     def getData(self) -> List[BankModel]:
         return self.__data
