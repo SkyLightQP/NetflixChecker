@@ -23,7 +23,7 @@ soupsieve==2.3.1
 trio==0.20.0
 trio-websocket==0.9.2
 typing_extensions==4.1.1
-urllib3==1.26.8
+urllib3==1.26.12
 urllib3-secure-extra==0.1.0
 wsproto==1.1.0
 yarl==1.7.2
