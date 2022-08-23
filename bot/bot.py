@@ -40,7 +40,7 @@ class Bot(commands.Bot):
                 embed = discord.Embed(title=f"입금 확인 ({i.who})",
                                       description=f"넷플릭스 {i.cost}원 입금 확인",
                                       color=0xF93A2F)
-                embed.set_footer(text=f"{i.date} {i.time}")
+                embed.set_footer(text=f"{i.date}")
                 await channel.send(embed=embed)
                 insert_cur = self.connection.cursor()
                 insert_cur.execute(f"INSERT INTO data VALUES ('{i.date}', '{i.who}');")
@@ -50,6 +50,6 @@ class Bot(commands.Bot):
         if count > 0:
             logger.info(f"Found new account {count} logs.")
 
-    @tasks.loop(minutes=8)
+    @tasks.loop(minutes=9)
     async def renewal_login_job(self):
         self.bank.renewal()
