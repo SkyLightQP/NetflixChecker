@@ -15,3 +15,5 @@ class ConfigModel:
 
     remotedriver_enable: bool
     remotedriver_host: str
+
+    dsn: str

@@ -15,5 +15,6 @@
   "remotedriver": {
     "enable": false,
     "host": ""
-  }
+  },
+  "dsn": ""
 }

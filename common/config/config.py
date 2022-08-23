@@ -25,6 +25,7 @@ class Config:
                                       bank_password=data['bank']['password'],
                                       account_password=data['account']['password'],
                                       remotedriver_enable=bool(data['remotedriver']['enable']),
-                                      remotedriver_host=data['remotedriver']['host']
+                                      remotedriver_host=data['remotedriver']['host'],
+                                      dsn=data['dsn']
                                       )
         return self.config
