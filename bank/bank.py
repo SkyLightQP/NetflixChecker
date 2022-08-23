@@ -5,7 +5,6 @@ from typing import List, Literal
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -135,13 +134,13 @@ class Bank:
                 self.driver.switch_to.default_content()
 
             logger.info(f"[BANK] Fetched bank data successfully. length={len(self.__data)}")
-        except WebDriverException as ex:
+        except Exception as ex:
             self.driver.save_screenshot(f"./error/{datetime.today().strftime('%Y%m%d%H%M%S')}_error.png")
             if self.retry == MAX_RETRY:
-                logger.error(f"[BANK] Failed during bank crawling. do not try anymore. {ex.msg}")
+                logger.error(f"[BANK] Failed during bank crawling. do not try anymore. - {ex.msg}")
                 return
             self.retry += 1
-            logger.warn(f"[BANK] Failed during bank crawling. retry ({self.retry}/{MAX_RETRY})")
+            logger.error(f"[BANK] Failed during bank crawling. retry ({self.retry}/{MAX_RETRY})")
             self.refresh()
 
     def renewal(self):

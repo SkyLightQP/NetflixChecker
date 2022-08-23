@@ -26,6 +26,9 @@ class Bot(commands.Bot):
         self.renewal_login_job.start()
         logger.info("Register schedule job.")
 
+    async def on_error(self, event, *args, **kwargs):
+        raise Exception(args[0])
+
     @tasks.loop(hours=4)
     async def check_account_log_job(self):
         self.bank.refresh()

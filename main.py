@@ -1,5 +1,7 @@
 import sqlite3
 
+import sentry_sdk
+
 from bot import BotCommands
 from bot import bot
 from common.config import Config
@@ -7,6 +9,11 @@ from common.config import Config
 
 def run():
     config = Config().get_config_model()
+
+    sentry_sdk.init(
+        dsn=config.dsn,
+        traces_sample_rate=1.0
+    )
 
     connection = sqlite3.connect('data.db')
 
