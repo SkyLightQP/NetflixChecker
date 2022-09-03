@@ -25,6 +25,7 @@ class Bot(commands.Bot):
 
         self.check_account_log_job.start()
         self.renewal_login_job.start()
+        self.send_report_job.start()
         logger.info("Register schedule job.")
 
     async def on_error(self, event, *args, **kwargs):
@@ -65,3 +66,26 @@ class Bot(commands.Bot):
             return
 
         self.bank.renewal()
+
+    @tasks.loop(minutes=1)
+    async def send_report_job(self):
+        now = datetime.now()
+        if now.weekday() == 6 and now.hour == 8 and now.minute == 0:
+            user = await self.fetch_user(int(self.config.discord_owner))
+            cur = self.connection.cursor()
+            cur.execute(f"SELECT * FROM data WHERE date LIKE '{now.year}-{now.month:02d}-%';")
+            data = cur.fetchall()
+
+            if len(data) > 0:
+                message = []
+                for item in data:
+                    message.append(f"- {item[0]} {item[1]}")
+                embed = discord.Embed(title=f"{now.month}월 넷플릭스 입금 리포트",
+                                      description='\n'.join(message),
+                                      color=0xF93A2F)
+                await user.send(embed=embed)
+            else:
+                embed = discord.Embed(title=f"{now.month}월 넷플릭스 입금 리포트",
+                                      description='입금 내역이 없습니다.',
+                                      color=0xF93A2F)
+                await user.send(embed=embed)
