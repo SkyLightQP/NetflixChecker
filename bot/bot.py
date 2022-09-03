@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlite3 import Connection
 
 import discord
@@ -31,6 +32,10 @@ class Bot(commands.Bot):
 
     @tasks.loop(hours=4)
     async def check_account_log_job(self):
+        now = datetime.now()
+        if (now.hour >= 23 and now.minute >= 30) and (now.hour <= 0 and now.minute <= 30):
+            return
+
         self.bank.refresh()
 
         channel = discord.utils.get(self.get_all_channels(), id=int(self.config.discord_channel))
@@ -51,8 +56,12 @@ class Bot(commands.Bot):
                 count += 1
 
         if count > 0:
-            logger.info(f"Found new account {count} logs.")
+            logger.info(f"Found new netflix {count} logs.")
 
     @tasks.loop(minutes=9)
     async def renewal_login_job(self):
+        now = datetime.now()
+        if (now.hour >= 23 and now.minute >= 30) and (now.hour <= 0 and now.minute <= 30):
+            return
+
         self.bank.renewal()
