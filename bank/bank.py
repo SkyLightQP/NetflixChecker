@@ -16,7 +16,7 @@ BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
 ONLY_UPPERCASE = re.compile("\b[A-Z]\b")
 ButtonType = Literal["shift", "char", "normal"]
 MAX_RETRY = 3
-BUTTON_DELAY = 0.2
+BUTTON_DELAY = 0.5
 
 
 class Bank:
@@ -34,7 +34,7 @@ class Bank:
         else:
             driver = webdriver.Chrome(executable_path="chromedriver", options=chrome_options)
         driver.get(BANK_URL)
-        driver.implicitly_wait(5)
+        driver.implicitly_wait(10)
 
         self.driver = driver
         self.bank_id = self.config.bank_id
