@@ -89,6 +89,7 @@ class Bank:
 
         self.driver.find_element(By.XPATH, '//*[@id="mtk_done"]').click()
         self.driver.find_element(By.ID, 'btn_idLogin').click()
+        self.driver.find_element(By.XPATH, '//*[@id="btn_alertLayer_yes"]').click()
 
         logger.info("[BANK] Completed login successfully.")
 
