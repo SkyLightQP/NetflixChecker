@@ -15,7 +15,7 @@ BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
 ONLY_UPPERCASE = re.compile("\b[A-Z]\b")
 ButtonType = Literal["shift", "char", "normal"]
 MAX_RETRY = 3
-BUTTON_DELAY = 1
+BUTTON_DELAY = 0.5
 
 
 class Bank:
@@ -24,8 +24,8 @@ class Bank:
 
     def __init__(self):
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("headless")
-        chrome_options.add_argument("disable-gpu")
+        # chrome_options.add_argument("headless")
+        # chrome_options.add_argument("disable-gpu")
         chrome_options.add_experimental_option("mobileEmulation", {"deviceName": "Galaxy S5"})
 
         if self.config.remotedriver_enable:
@@ -89,9 +89,8 @@ class Bank:
         self.driver.find_element(By.XPATH, '//*[@id="mtk_done"]').click()
         self.driver.find_element(By.ID, 'btn_idLogin').click()
 
-        popup = self.driver.find_element(By.XPATH, '//*[@id="btn_alertLayer_yes"]')
-        if popup.is_displayed() and popup.is_enabled():
-            popup.click()
+        WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="btn_alertLayer_yes"]')))
+        self.driver.find_element(By.XPATH, '//*[@id="btn_alertLayer_yes"]').click()
 
         logger.info("[BANK] Completed login successfully.")
 
