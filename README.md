@@ -24,7 +24,7 @@ cp config.json.example config.json
 중복으로 입금 확인을 하지 않기 위해 데이터베이스를 사용합니다.
 
 ```shell
-cat > data.db
+touch data.db
 ```
 
 ```sql
@@ -36,8 +36,4 @@ CREATE TABLE data (
 
 ## TODO
 
-- [x] 프로덕션 환경에서 크롤링 실패하는 경우가 매우 많음
-  - 현재는 크롤링 Retry 기능을 이용해 보완 중
-- [x] 매번 로그인을 안하고 데이터 크롤링이 가능하도록 변경
-- [x] 매주 입금 내역 DM으로 리포팅
 - [ ] 민감한 정보을 안전하게 저장하도록 변경
