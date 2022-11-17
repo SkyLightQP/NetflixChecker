@@ -1,6 +1,5 @@
 import re
 import time
-from datetime import datetime
 from typing import List, Literal
 
 from bs4 import BeautifulSoup
@@ -89,7 +88,10 @@ class Bank:
 
         self.driver.find_element(By.XPATH, '//*[@id="mtk_done"]').click()
         self.driver.find_element(By.ID, 'btn_idLogin').click()
-        self.driver.find_element(By.XPATH, '//*[@id="btn_alertLayer_yes"]').click()
+
+        popup = self.driver.find_element(By.XPATH, '//*[@id="btn_alertLayer_yes"]')
+        if popup.is_displayed() and popup.is_enabled():
+            popup.click()
 
         logger.info("[BANK] Completed login successfully.")
 
