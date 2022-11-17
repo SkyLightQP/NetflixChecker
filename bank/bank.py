@@ -34,7 +34,7 @@ class Bank:
         else:
             driver = webdriver.Chrome(executable_path="chromedriver", options=chrome_options)
         driver.get(BANK_URL)
-        driver.implicitly_wait(10)
+        driver.implicitly_wait(20)
 
         self.driver = driver
         self.bank_id = self.config.bank_id
