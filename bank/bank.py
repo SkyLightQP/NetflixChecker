@@ -135,7 +135,6 @@ class Bank:
 
             logger.info(f"[BANK] Fetched bank data successfully. length={len(self.__data)}")
         except Exception as ex:
-            self.driver.save_screenshot(f"./error/{datetime.today().strftime('%Y%m%d%H%M%S')}_error.png")
             if self.retry == MAX_RETRY:
                 logger.error(f"[BANK] Failed during bank crawling. do not try anymore. - {ex.msg}")
                 return
