@@ -16,7 +16,7 @@ BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
 ONLY_UPPERCASE = re.compile("\b[A-Z]\b")
 ButtonType = Literal["shift", "char", "normal"]
 MAX_RETRY = 3
-BUTTON_DELAY = 0.5
+BUTTON_DELAY = 1
 
 
 class Bank:
@@ -47,15 +47,15 @@ class Bank:
     def __click_button(self, type: ButtonType, value):
         if type == "shift":
             self.driver.find_element(By.XPATH, "//img[@alt='쉬프트']").find_element(By.XPATH, "./../..").click()
-            time.sleep(0.1)
+            time.sleep(0.5)
             self.driver.find_element(By.XPATH, f"//img[@alt='대문자{value}']").find_element(By.XPATH, "./../..").click()
-            time.sleep(0.1)
+            time.sleep(0.5)
             self.driver.find_element(By.XPATH, "//img[@alt='쉬프트']").find_element(By.XPATH, "./../..").click()
         if type == "char":
             self.driver.find_element(By.XPATH, "//img[@alt='특수키']").find_element(By.XPATH, "./../..").click()
-            time.sleep(0.1)
+            time.sleep(0.5)
             self.driver.find_element(By.XPATH, f"//img[@alt='{value}']").find_element(By.XPATH, "./../..").click()
-            time.sleep(0.1)
+            time.sleep(0.5)
             self.driver.find_element(By.XPATH, "//img[@alt='특수키']").find_element(By.XPATH, "./../..").click()
         if type == "normal":
             self.driver.find_element(By.XPATH, f"//img[@alt='{value}']").find_element(By.XPATH, "./../..").click()
@@ -63,7 +63,7 @@ class Bank:
     def login(self):
         logger.info("[BANK] Start bank login.")
 
-        WebDriverWait(self.driver, 200).until(EC.element_to_be_clickable((By.ID, 'btn_idLogin')))
+        WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.ID, 'btn_idLogin')))
 
         self.driver.find_element(By.XPATH, '//*[@id="ibx_loginId"]').send_keys(self.bank_id)
         self.driver.find_element(By.XPATH, '//*[@id="비밀번호"]').click()
