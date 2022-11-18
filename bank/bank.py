@@ -16,6 +16,7 @@ ONLY_UPPERCASE = re.compile("\b[A-Z]\b")
 ButtonType = Literal["shift", "char", "normal"]
 MAX_RETRY = 3
 BUTTON_DELAY = 0.5
+WAIT_TIME = 20
 
 
 class Bank:
@@ -24,8 +25,8 @@ class Bank:
 
     def __init__(self):
         chrome_options = webdriver.ChromeOptions()
-        # chrome_options.add_argument("headless")
-        # chrome_options.add_argument("disable-gpu")
+        chrome_options.add_argument("headless")
+        chrome_options.add_argument("disable-gpu")
         chrome_options.add_experimental_option("mobileEmulation", {"deviceName": "Galaxy S5"})
 
         if self.config.remotedriver_enable:
@@ -33,7 +34,7 @@ class Bank:
         else:
             driver = webdriver.Chrome(executable_path="chromedriver", options=chrome_options)
         driver.get(BANK_URL)
-        driver.implicitly_wait(20)
+        driver.implicitly_wait(WAIT_TIME)
 
         self.driver = driver
         self.bank_id = self.config.bank_id
@@ -46,15 +47,15 @@ class Bank:
     def __click_button(self, type: ButtonType, value):
         if type == "shift":
             self.driver.find_element(By.XPATH, "//img[@alt='쉬프트']").find_element(By.XPATH, "./../..").click()
-            time.sleep(0.5)
+            time.sleep(BUTTON_DELAY)
             self.driver.find_element(By.XPATH, f"//img[@alt='대문자{value}']").find_element(By.XPATH, "./../..").click()
-            time.sleep(0.5)
+            time.sleep(BUTTON_DELAY)
             self.driver.find_element(By.XPATH, "//img[@alt='쉬프트']").find_element(By.XPATH, "./../..").click()
         if type == "char":
             self.driver.find_element(By.XPATH, "//img[@alt='특수키']").find_element(By.XPATH, "./../..").click()
-            time.sleep(0.5)
+            time.sleep(BUTTON_DELAY)
             self.driver.find_element(By.XPATH, f"//img[@alt='{value}']").find_element(By.XPATH, "./../..").click()
-            time.sleep(0.5)
+            time.sleep(BUTTON_DELAY)
             self.driver.find_element(By.XPATH, "//img[@alt='특수키']").find_element(By.XPATH, "./../..").click()
         if type == "normal":
             self.driver.find_element(By.XPATH, f"//img[@alt='{value}']").find_element(By.XPATH, "./../..").click()
@@ -62,7 +63,7 @@ class Bank:
     def login(self):
         logger.info("[BANK] Start bank login.")
 
-        WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.ID, 'btn_idLogin')))
+        WebDriverWait(self.driver, WAIT_TIME).until(EC.element_to_be_clickable((By.ID, 'btn_idLogin')))
 
         self.driver.find_element(By.XPATH, '//*[@id="ibx_loginId"]').send_keys(self.bank_id)
         self.driver.find_element(By.XPATH, '//*[@id="비밀번호"]').click()
@@ -89,7 +90,7 @@ class Bank:
         self.driver.find_element(By.XPATH, '//*[@id="mtk_done"]').click()
         self.driver.find_element(By.ID, 'btn_idLogin').click()
 
-        WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="btn_alertLayer_yes"]')))
+        WebDriverWait(self.driver, WAIT_TIME).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="btn_alertLayer_yes"]')))
         self.driver.find_element(By.XPATH, '//*[@id="btn_alertLayer_yes"]').click()
 
         logger.info("[BANK] Completed login successfully.")
@@ -146,8 +147,13 @@ class Bank:
 
     def renewal(self):
         logger.info(f"[BANK] Renewal login.")
+        WebDriverWait(self.driver, WAIT_TIME).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="wq_uuid_1118"]')))
         self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_1118"]').click()
+
+        WebDriverWait(self.driver, WAIT_TIME).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="wq_uuid_1139"]')))
         self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_1139"]').click()
+
+        WebDriverWait(self.driver, WAIT_TIME).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="wq_uuid_1126"]')))
         self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_1126"]').click()
         logger.info(f"[BANK] Renewed login successfully.")
 
