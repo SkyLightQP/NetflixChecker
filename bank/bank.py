@@ -43,6 +43,7 @@ class Bank:
         self.bank_cost = self.config.bank_cost
 
         self.retry = 0
+        self.renewal_retry = 0
 
     def __click_button(self, type: ButtonType, value):
         if type == "shift":
@@ -90,7 +91,8 @@ class Bank:
         self.driver.find_element(By.XPATH, '//*[@id="mtk_done"]').click()
         self.driver.find_element(By.ID, 'btn_idLogin').click()
 
-        WebDriverWait(self.driver, WAIT_TIME).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="btn_alertLayer_yes"]')))
+        WebDriverWait(self.driver, WAIT_TIME).until(
+            EC.element_to_be_clickable((By.XPATH, '//*[@id="btn_alertLayer_yes"]')))
         self.driver.find_element(By.XPATH, '//*[@id="btn_alertLayer_yes"]').click()
 
         logger.info("[BANK] Completed login successfully.")
@@ -146,16 +148,27 @@ class Bank:
             self.refresh()
 
     def renewal(self):
-        logger.info(f"[BANK] Renewal login.")
-        WebDriverWait(self.driver, WAIT_TIME).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="wq_uuid_1118"]')))
-        self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_1118"]').click()
+        try:
+            logger.info(f"[BANK] Renewal login.")
+            WebDriverWait(self.driver, WAIT_TIME).until(
+                EC.element_to_be_clickable((By.XPATH, '//*[@id="wq_uuid_1118"]')))
+            self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_1118"]').click()
 
-        WebDriverWait(self.driver, WAIT_TIME).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="wq_uuid_1139"]')))
-        self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_1139"]').click()
+            WebDriverWait(self.driver, WAIT_TIME).until(
+                EC.element_to_be_clickable((By.XPATH, '//*[@id="wq_uuid_1139"]')))
+            self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_1139"]').click()
 
-        WebDriverWait(self.driver, WAIT_TIME).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="wq_uuid_1126"]')))
-        self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_1126"]').click()
-        logger.info(f"[BANK] Renewed login successfully.")
+            WebDriverWait(self.driver, WAIT_TIME).until(
+                EC.element_to_be_clickable((By.XPATH, '//*[@id="wq_uuid_1126"]')))
+            self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_1126"]').click()
+            logger.info(f"[BANK] Renewed login successfully.")
+        except Exception as ex:
+            if self.renewal_retry == MAX_RETRY:
+                logger.error(f"[BANK] Failed during renewal session. do not try anymore. - {ex.msg}")
+                return
+            self.renewal_retry += 1
+            logger.error(f"[BANK] Failed during renewal session. retry ({self.renewal_retry}/{MAX_RETRY})")
+            self.renewal()
 
     def get_data(self) -> List[BankModel]:
         return self.__data
