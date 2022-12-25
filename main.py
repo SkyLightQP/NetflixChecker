@@ -5,6 +5,7 @@ import sentry_sdk
 from bot import BotCommands
 from bot import bot
 from common.config import Config
+from common.database import Base, engine
 
 
 def run():
@@ -14,6 +15,9 @@ def run():
         dsn=config.dsn,
         traces_sample_rate=1.0
     )
+
+    from models import private, log, user
+    Base.metadata.create_all(bind=engine)
 
     connection = sqlite3.connect('data.db')
 
