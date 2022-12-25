@@ -8,6 +8,7 @@ cffi==1.15.0
 chardet==4.0.0
 cryptography==36.0.1
 discord.py==1.7.3
+greenlet==2.0.1
 h11==0.13.0
 idna==3.3
 multidict==6.0.2
@@ -20,6 +21,7 @@ sentry-sdk==1.9.5
 sniffio==1.2.0
 sortedcontainers==2.4.0
 soupsieve==2.3.1
+SQLAlchemy==1.4.45
 trio==0.20.0
 trio-websocket==0.9.2
 typing_extensions==4.1.1
