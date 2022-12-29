@@ -8,8 +8,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
+from bank.data.BankData import BankData
 from common import logger, Config
-from .model import BankModel
 
 BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
 ONLY_UPPERCASE = re.compile("\b[A-Z]\b")
@@ -20,7 +20,7 @@ WAIT_TIME = 20
 
 
 class Bank:
-    __data: List[BankModel] = []
+    __data: List[BankData] = []
     config = Config().get_config_model()
 
     def __init__(self):
@@ -133,7 +133,7 @@ class Bank:
                 who = bs.select_one('#wq_uuid_66 > span').get_text()
 
                 if cost != 0 and cost == self.bank_cost:
-                    self.__data.append(BankModel(ttime, date, cost, who))
+                    self.__data.append(BankData(ttime, date, cost, who))
 
                 self.driver.find_element(By.XPATH, '//*[@id="btn_목록보기"]').click()
                 self.driver.switch_to.default_content()
@@ -162,5 +162,5 @@ class Bank:
             logger.error(f"[BANK] Failed during renewal session. retry ({self.renewal_retry}/{MAX_RETRY})")
             self.renewal()
 
-    def get_data(self) -> List[BankModel]:
+    def get_data(self) -> List[BankData]:
         return self.__data

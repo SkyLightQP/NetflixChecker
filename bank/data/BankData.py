@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class BankModel:
+class BankData:
     time: str
     date: str
     cost: str

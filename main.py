@@ -1,5 +1,3 @@
-import sqlite3
-
 import sentry_sdk
 
 from bot import BotCommands
@@ -19,13 +17,9 @@ def run():
     from models import private, log, user
     Base.metadata.create_all(bind=engine)
 
-    connection = sqlite3.connect('data.db')
-
-    client = bot.Bot(connection, command_prefix="!")
+    client = bot.Bot(command_prefix="!")
     client.add_cog(BotCommands(client))
     client.run(config.discord_token)
-
-    connection.close()
 
 
 if __name__ == '__main__':
