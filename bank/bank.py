@@ -62,8 +62,6 @@ class Bank:
             self.driver.find_element(By.XPATH, f"//img[@alt='{value}']").find_element(By.XPATH, "./../..").click()
 
     def login(self):
-        logger.info("[BANK] Start bank login.")
-
         WebDriverWait(self.driver, WAIT_TIME).until(EC.element_to_be_clickable((By.ID, 'btn_idLogin')))
 
         self.driver.find_element(By.XPATH, '//*[@id="ibx_loginId"]').send_keys(self.bank_id)
@@ -98,8 +96,6 @@ class Bank:
         logger.info("[BANK] Completed login successfully.")
 
     def select_account(self):
-        logger.info("[BANK] Start select bank account.")
-
         self.driver.find_element(By.XPATH, '//*[@class="w2textbox mt5"]').click()
         self.driver.find_element(By.XPATH, '//*[@id="sbx_accno_input_0"]/option[2]').click()
 
@@ -112,12 +108,10 @@ class Bank:
         self.driver.find_element(By.XPATH, '//*[@id="wfr_searchCalendar_rad_gigan"]/div[3]').click()  # 1주일
         self.driver.find_element(By.XPATH, '//*[@id="btn_조회"]').click()
 
-        logger.info("[BANK] Selected bank account successfully.")
+        logger.info("[BANK] Found bank account successfully.")
 
     def refresh(self):
         try:
-            logger.info(f"[BANK] Fetch bank data of account.")
-
             self.__data = []
             original = self.driver.find_elements(By.CSS_SELECTOR, '#F01_grd_list_body_tbody > tr')
             for i in range(0, len(original)):
@@ -141,7 +135,7 @@ class Bank:
             logger.info(f"[BANK] Fetched bank data successfully. length={len(self.__data)}")
         except Exception as ex:
             if self.retry == MAX_RETRY:
-                logger.error(f"[BANK] Failed during bank crawling. do not try anymore. - {ex.msg}")
+                logger.error(f"[BANK] Failed during bank crawling. do not try anymore.\n{ex.msg}")
                 return
             self.retry += 1
             logger.error(f"[BANK] Failed during bank crawling. retry ({self.retry}/{MAX_RETRY})")
@@ -149,14 +143,13 @@ class Bank:
 
     def renewal(self):
         try:
-            logger.info(f"[BANK] Renewal login.")
             self.driver.find_element(By.XPATH, '//*[@class="w2group btnTotalOpen"]').click()
             self.driver.find_element(By.XPATH, '//*[@id="totalMenu"]/div[1]/div/span/span/a').click()
             self.driver.find_element(By.XPATH, '//*[@class="w2group btnTotalClose"]').click()
-            logger.info(f"[BANK] Renewed login successfully.")
+            logger.info(f"[BANK] Renewed login session successfully.")
         except Exception as ex:
             if self.renewal_retry == MAX_RETRY:
-                logger.error(f"[BANK] Failed during renewal session. do not try anymore. - {ex.msg}")
+                logger.error(f"[BANK] Failed during renewal session. do not try anymore.\n{ex.msg}")
                 return
             self.renewal_retry += 1
             logger.error(f"[BANK] Failed during renewal session. retry ({self.renewal_retry}/{MAX_RETRY})")

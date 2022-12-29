@@ -16,16 +16,16 @@ class Bot(commands.Bot):
         self.bank = Bank()
 
     async def on_ready(self):
-        logger.info("Start discord bot successfully.")
+        logger.info("[BOT] Start discord bot successfully.")
 
         self.bank.login()
         self.bank.select_account()
-        logger.info("Initialize bank account.")
+        logger.info("[BANK] Initialize bank account.")
 
         self.check_account_log_job.start()
         self.renewal_login_job.start()
         self.send_report_job.start()
-        logger.info("Register schedule job.")
+        logger.info("[JOB] Register schedule job.")
 
     async def on_error(self, event, *args, **kwargs):
         raise Exception(args[0])
@@ -44,8 +44,8 @@ class Bot(commands.Bot):
         for i in self.bank.get_data():
             log = session.query(Log).filter(Log.date == i.date and Log.who == i.who).first()
             if log is None:
-                embed = discord.Embed(title=f"입금 확인 ({i.who})",
-                                      description=f"넷플릭스 {i.cost}원 입금 확인",
+                embed = discord.Embed(title=f"넷플릭스 입금 ({i.who})",
+                                      description=f"{i.cost}원 확인 완료",
                                       color=0xF93A2F)
                 embed.set_footer(text=f"{i.date}")
                 await channel.send(embed=embed)
