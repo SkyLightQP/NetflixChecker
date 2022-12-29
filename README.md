@@ -8,9 +8,6 @@
 
 ## 시작하기
 
-- Python 3.10
-- Chromedriver
-
 ```shell
 pip install -r requirements.txt
 ```
@@ -21,17 +18,10 @@ cp config.json.example config.json
 
 ## 데이터베이스 구축하기 
 
-중복으로 입금 확인을 하지 않기 위해 데이터베이스를 사용합니다.
+데이터베이스는 SQLite를 사용합니다. `.db` 파일을 만들면 ORM을 통해 자동으로 초기화합니다.
 
 ```shell
 touch data.db
-```
-
-```sql
-CREATE TABLE data (
-    date TEXT,
-    name TEXT
-);
 ```
 
 ## TODO
