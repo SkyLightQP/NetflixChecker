@@ -100,7 +100,7 @@ class Bank:
     def select_account(self):
         logger.info("[BANK] Start select bank account.")
 
-        self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_852"]').click()
+        self.driver.find_element(By.XPATH, '//*[@class="w2textbox mt5"]').click()
         self.driver.find_element(By.XPATH, '//*[@id="sbx_accno_input_0"]/option[2]').click()
 
         self.driver.find_element(By.XPATH, '//*[@id="계좌비밀번호"]').click()
@@ -150,17 +150,9 @@ class Bank:
     def renewal(self):
         try:
             logger.info(f"[BANK] Renewal login.")
-            WebDriverWait(self.driver, WAIT_TIME).until(
-                EC.element_to_be_clickable((By.XPATH, '//*[@id="wq_uuid_1118"]')))
-            self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_1118"]').click()
-
-            WebDriverWait(self.driver, WAIT_TIME).until(
-                EC.element_to_be_clickable((By.XPATH, '//*[@id="wq_uuid_1139"]')))
-            self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_1139"]').click()
-
-            WebDriverWait(self.driver, WAIT_TIME).until(
-                EC.element_to_be_clickable((By.XPATH, '//*[@id="wq_uuid_1126"]')))
-            self.driver.find_element(By.XPATH, '//*[@id="wq_uuid_1126"]').click()
+            self.driver.find_element(By.XPATH, '//*[@class="w2group btnTotalOpen"]').click()
+            self.driver.find_element(By.XPATH, '//*[@id="totalMenu"]/div[1]/div/span/span/a').click()
+            self.driver.find_element(By.XPATH, '//*[@class="w2group btnTotalClose"]').click()
             logger.info(f"[BANK] Renewed login successfully.")
         except Exception as ex:
             if self.renewal_retry == MAX_RETRY:
