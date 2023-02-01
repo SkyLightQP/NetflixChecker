@@ -16,7 +16,6 @@ class Bot(commands.Bot):
         self.bank = Bank()
 
     async def on_ready(self):
-        await self.change_presence(activity=discord.Game(name="https://github.com/SkyLightQP/NetflixChecker"), status=discord.Status.online)
         logger.info("[BOT] Start discord bot successfully.")
 
         self.bank.login()
