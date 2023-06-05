@@ -30,7 +30,7 @@ class Bot(commands.Bot):
     async def on_error(self, event, *args, **kwargs):
         raise Exception(args[0])
 
-    @tasks.loop(hours=4)
+    @tasks.loop(hours=6)
     async def check_account_log_job(self):
         now = datetime.now()
         if (now.hour >= 23 and now.minute >= 30) and (now.hour <= 0 and now.minute <= 30):
@@ -57,7 +57,7 @@ class Bot(commands.Bot):
         if count > 0:
             logger.info(f"Found new netflix {count} logs.")
 
-    @tasks.loop(minutes=9)
+    @tasks.loop(minutes=7)
     async def renewal_login_job(self):
         now = datetime.now()
         if (now.hour >= 23 and now.minute >= 30) and (now.hour <= 0 and now.minute <= 30):
