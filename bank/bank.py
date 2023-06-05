@@ -126,8 +126,12 @@ class Bank:
                 cost = bs.select_one('#wq_uuid_61 > span').get_text()
                 who = bs.select_one('#wq_uuid_66 > span').get_text()
 
-                if cost != 0 and cost == self.bank_cost:
-                    self.__data.append(BankData(ttime, date, cost, who))
+                if cost != 0:
+                    bank_cost_x2 = str(int(self.bank_cost.replace(",", "")) * 2)
+                    if cost == self.bank_cost:
+                        self.__data.append(BankData(ttime, date, cost, who))
+                    elif cost.replace(",", "") == bank_cost_x2:
+                        self.__data.append(BankData(ttime, date, cost, who))
 
                 self.driver.find_element(By.XPATH, '//*[@id="btn_목록보기"]').click()
                 self.driver.switch_to.default_content()
