@@ -2,7 +2,6 @@ from datetime import datetime
 
 import discord
 from discord.ext import commands, tasks
-from sentry_sdk.crons import monitor
 
 from bank import Bank
 from common import logger, Config, Session
@@ -31,7 +30,6 @@ class Bot(commands.Bot):
     async def on_error(self, event, *args, **kwargs):
         raise Exception(args[0])
 
-    @monitor(monitor_slug='check_account_log_job')
     @tasks.loop(hours=6)
     async def check_account_log_job(self):
         now = datetime.now()
