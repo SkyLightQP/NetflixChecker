@@ -26,6 +26,7 @@ class Config:
                                       account_password=data['account']['password'],
                                       remotedriver_enable=bool(data['remotedriver']['enable']),
                                       remotedriver_host=data['remotedriver']['host'],
+                                      headless=bool(data['headless']),
                                       dsn=data['dsn']
                                       )
         return self.config

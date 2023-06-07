@@ -16,5 +16,6 @@
     "enable": false,
     "host": ""
   },
+  "headless": false,
   "dsn": ""
 }

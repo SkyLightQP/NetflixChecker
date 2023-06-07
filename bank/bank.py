@@ -25,8 +25,9 @@ class Bank:
 
     def __init__(self):
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("headless")
-        chrome_options.add_argument("disable-gpu")
+        if self.config.headless:
+            chrome_options.add_argument("headless")
+            chrome_options.add_argument("disable-gpu")
         chrome_options.add_experimental_option("mobileEmulation", {"deviceName": "Galaxy S5"})
 
         if self.config.remotedriver_enable:
