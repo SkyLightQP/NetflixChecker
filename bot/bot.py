@@ -28,7 +28,11 @@ class Bot(commands.Bot):
         logger.info("[JOB] Register schedule job.")
 
     async def on_error(self, event, *args, **kwargs):
+        self.bank.driver.quit()
         raise Exception(args[0])
+
+    async def on_disconnect(self):
+        self.bank.driver.quit()
 
     @tasks.loop(hours=6)
     async def check_account_log_job(self):
