@@ -28,7 +28,7 @@ class Bank:
         if self.config.selenium_use_headless:
             chrome_options.add_argument("headless")
             chrome_options.add_argument("disable-gpu")
-        chrome_options.add_experimental_option("mobileEmulation", {"deviceName": "Galaxy S5"})
+        chrome_options.add_experimental_option("mobileEmulation", {"deviceName": "Samsung Galaxy S20 Ultra"})
 
         if self.config.selenium_use_remote:
             driver = webdriver.Remote(self.config.selenium_host, chrome_options.to_capabilities())
