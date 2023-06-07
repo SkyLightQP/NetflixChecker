@@ -44,7 +44,6 @@ class Bank:
         self.bank_cost = self.config.bank_cost
 
         self.retry = 0
-        self.renewal_retry = 0
 
     def __click_button(self, type: ButtonType, value):
         if type == "shift":
@@ -146,19 +145,14 @@ class Bank:
             logger.error(f"[BANK] Failed during bank crawling. retry ({self.retry}/{MAX_RETRY})")
             self.refresh()
 
-    def renewal(self):
+    def renew_session(self):
         try:
             self.driver.find_element(By.XPATH, '//*[@class="w2group btnTotalOpen"]').click()
             self.driver.find_element(By.XPATH, '//*[@id="totalMenu"]/div[1]/div/span/span/a').click()
             self.driver.find_element(By.XPATH, '//*[@class="w2group btnTotalClose"]').click()
             logger.info(f"[BANK] Renewed login session successfully.")
         except Exception as ex:
-            if self.renewal_retry == MAX_RETRY:
-                logger.error(f"[BANK] Failed during renewal session. do not try anymore.\n{ex.msg}")
-                return
-            self.renewal_retry += 1
-            logger.error(f"[BANK] Failed during renewal session. retry ({self.renewal_retry}/{MAX_RETRY})")
-            self.renewal()
+            logger.error(f"[BANK] Failed during renew session. \n{ex.msg}")
 
     def get_data(self) -> List[BankData]:
         return self.__data

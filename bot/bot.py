@@ -63,7 +63,7 @@ class Bot(commands.Bot):
         if (now.hour >= 23 and now.minute >= 30) and (now.hour <= 0 and now.minute <= 30):
             return
 
-        self.bank.renewal()
+        self.bank.renew_session()
 
     @tasks.loop(minutes=1)
     async def send_report_job(self):
