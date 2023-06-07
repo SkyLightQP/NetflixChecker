@@ -24,9 +24,9 @@ class Config:
                                       bank_id=data['bank']['id'],
                                       bank_password=data['bank']['password'],
                                       account_password=data['account']['password'],
-                                      remotedriver_enable=bool(data['remotedriver']['enable']),
-                                      remotedriver_host=data['remotedriver']['host'],
-                                      headless=bool(data['headless']),
+                                      selenium_use_remote=bool(data['selenium']['use_remote']),
+                                      selenium_host=data['selenium']['host'],
+                                      selenium_use_headless=bool(data['selenium']['use_headless']),
                                       dsn=data['dsn']
                                       )
         return self.config

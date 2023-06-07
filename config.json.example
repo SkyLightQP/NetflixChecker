@@ -12,10 +12,10 @@
   "account": {
     "password": ""
   },
-  "remotedriver": {
-    "enable": false,
-    "host": ""
+  "selenium": {
+    "use_remote": false,
+    "host": "",
+    "use_headless": false
   },
-  "headless": false,
   "dsn": ""
 }

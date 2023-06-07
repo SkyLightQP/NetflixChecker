@@ -25,13 +25,13 @@ class Bank:
 
     def __init__(self):
         chrome_options = webdriver.ChromeOptions()
-        if self.config.headless:
+        if self.config.selenium_use_headless:
             chrome_options.add_argument("headless")
             chrome_options.add_argument("disable-gpu")
         chrome_options.add_experimental_option("mobileEmulation", {"deviceName": "Galaxy S5"})
 
-        if self.config.remotedriver_enable:
-            driver = webdriver.Remote(self.config.remotedriver_host, chrome_options.to_capabilities())
+        if self.config.selenium_use_remote:
+            driver = webdriver.Remote(self.config.selenium_host, chrome_options.to_capabilities())
         else:
             driver = webdriver.Chrome(executable_path="chromedriver", options=chrome_options)
         driver.get(BANK_URL)

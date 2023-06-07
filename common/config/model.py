@@ -13,9 +13,8 @@ class ConfigModel:
 
     account_password: str
 
-    remotedriver_enable: bool
-    remotedriver_host: str
-
-    headless: bool
+    selenium_use_remote: bool
+    selenium_host: str
+    selenium_use_headless: bool
 
     dsn: str
