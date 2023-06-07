@@ -15,7 +15,7 @@ BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
 ONLY_UPPERCASE = re.compile("\b[A-Z]\b")
 ButtonType = Literal["shift", "char", "normal"]
 MAX_RETRY = 3
-BUTTON_DELAY = 0.5
+BUTTON_DELAY = 0.7
 WAIT_TIME = 20
 
 
