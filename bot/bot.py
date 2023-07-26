@@ -32,6 +32,7 @@ class Bot(commands.Bot):
     async def check_account_log_job(self):
         now = datetime.now()
         if (now.hour >= 23 and now.minute >= 30) and (now.hour <= 0 and now.minute <= 30):
+            logger.info("[JOB] Bank system is under maintenance. Skip this task.")
             return
 
         logger.info("[JOB] Initializing bank account...")
