@@ -44,7 +44,7 @@ class Bot(commands.Bot):
         for i in self.bank.get_data():
             log = session.query(Log).filter(Log.date == i.date and Log.who == i.who).first()
             if log is None:
-                embed = discord.Embed(title=f"넷플릭스 입금 ({i.who})",
+                embed = discord.Embed(title=f"넷플릭스 ({i.who})",
                                       description=f"{i.cost_month}달 확인 완료",
                                       color=0xF93A2F)
                 embed.set_footer(text=f"{i.date}")
