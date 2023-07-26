@@ -7,3 +7,4 @@ class BankData:
     date: str
     cost: str
     who: str
+    cost_month: str

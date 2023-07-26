@@ -134,9 +134,9 @@ class Bank:
                 if cost != 0:
                     bank_cost_x2 = str(int(self.bank_cost.replace(",", "")) * 2)
                     if cost == self.bank_cost:
-                        self.__data.append(BankData(ttime, date, cost, who))
+                        self.__data.append(BankData(ttime, date, cost, who, "1"))
                     elif cost.replace(",", "") == bank_cost_x2:
-                        self.__data.append(BankData(ttime, date, cost, who))
+                        self.__data.append(BankData(ttime, date, cost, who, "2"))
 
                 self.driver.find_element(By.XPATH, '//*[@id="btn_목록보기"]').click()
                 self.driver.switch_to.default_content()

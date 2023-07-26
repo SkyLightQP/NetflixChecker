@@ -45,7 +45,7 @@ class Bot(commands.Bot):
             log = session.query(Log).filter(Log.date == i.date and Log.who == i.who).first()
             if log is None:
                 embed = discord.Embed(title=f"넷플릭스 입금 ({i.who})",
-                                      description=f"{i.cost}원 확인 완료",
+                                      description=f"{i.cost_month}달 확인 완료",
                                       color=0xF93A2F)
                 embed.set_footer(text=f"{i.date}")
                 await channel.send(embed=embed)
