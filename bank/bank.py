@@ -22,8 +22,19 @@ WAIT_TIME = 20
 class Bank:
     __data: List[BankData] = []
     config = Config().get_config_model()
+    driver = None
 
     def __init__(self):
+        self.__create_driver()
+
+        self.bank_id = self.config.bank_id
+        self.bank_password = self.config.bank_password
+        self.account_password = self.config.account_password
+        self.bank_cost = self.config.bank_cost
+
+        self.retry = 0
+
+    def __create_driver(self):
         chrome_options = webdriver.ChromeOptions()
         if self.config.selenium_use_headless:
             chrome_options.add_argument("headless")
@@ -38,12 +49,6 @@ class Bank:
         driver.implicitly_wait(WAIT_TIME)
 
         self.driver = driver
-        self.bank_id = self.config.bank_id
-        self.bank_password = self.config.bank_password
-        self.account_password = self.config.account_password
-        self.bank_cost = self.config.bank_cost
-
-        self.retry = 0
 
     def __click_button(self, type: ButtonType, value):
         if type == "shift":
@@ -61,7 +66,7 @@ class Bank:
         if type == "normal":
             self.driver.find_element(By.XPATH, f"//img[@alt='{value}']").find_element(By.XPATH, "./../..").click()
 
-    def login(self):
+    def __login(self):
         WebDriverWait(self.driver, WAIT_TIME).until(EC.element_to_be_clickable((By.ID, 'btn_idLogin')))
 
         self.driver.find_element(By.XPATH, '//*[@id="ibx_loginId"]').send_keys(self.bank_id)
@@ -95,7 +100,7 @@ class Bank:
 
         logger.info("[BANK] Completed login successfully.")
 
-    def select_account(self):
+    def __select_account(self):
         self.driver.find_element(By.XPATH, '//*[@class="w2textbox mt5"]').click()
         self.driver.find_element(By.XPATH, '//*[@id="sbx_accno_input_0"]/option[2]').click()
 
@@ -110,7 +115,7 @@ class Bank:
 
         logger.info("[BANK] Found bank account successfully.")
 
-    def refresh(self):
+    def __refresh(self):
         try:
             self.__data = []
             original = self.driver.find_elements(By.CSS_SELECTOR, '#F01_grd_list_body_tbody > tr')
@@ -143,16 +148,15 @@ class Bank:
                 return
             self.retry += 1
             logger.error(f"[BANK] Failed during bank crawling. retry ({self.retry}/{MAX_RETRY})")
-            self.refresh()
+            self.__refresh()
 
-    def renew_session(self):
-        try:
-            self.driver.find_element(By.XPATH, '//*[@class="w2group btnTotalOpen"]').click()
-            self.driver.find_element(By.XPATH, '//*[@id="totalMenu"]/div[1]/div/span/span/a').click()
-            self.driver.find_element(By.XPATH, '//*[@class="w2group btnTotalClose"]').click()
-            logger.info(f"[BANK] Renewed login session successfully.")
-        except Exception as ex:
-            logger.error(f"[BANK] Failed during renew session. \n{ex.msg}")
+    def crawl_bank(self):
+        if self.driver is None:
+            self.__create_driver()
+        self.__login()
+        self.__select_account()
+        self.__refresh()
+        self.driver.close()
 
     def get_data(self) -> List[BankData]:
         return self.__data

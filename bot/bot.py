@@ -18,12 +18,7 @@ class Bot(commands.Bot):
     async def on_ready(self):
         logger.info("[BOT] Start discord bot successfully.")
 
-        self.bank.login()
-        self.bank.select_account()
-        logger.info("[BANK] Initialize bank account.")
-
         self.check_account_log_job.start()
-        self.renewal_login_job.start()
         self.send_report_job.start()
         logger.info("[JOB] Register schedule job.")
 
@@ -39,7 +34,8 @@ class Bot(commands.Bot):
         if (now.hour >= 23 and now.minute >= 30) and (now.hour <= 0 and now.minute <= 30):
             return
 
-        self.bank.refresh()
+        logger.info("[JOB] Initializing bank account...")
+        self.bank.crawl_bank()
 
         channel = discord.utils.get(self.get_all_channels(), id=int(self.config.discord_channel))
         session = Session()
@@ -59,14 +55,6 @@ class Bot(commands.Bot):
 
         if count > 0:
             logger.info(f"Found new netflix {count} logs.")
-
-    @tasks.loop(minutes=7)
-    async def renewal_login_job(self):
-        now = datetime.now()
-        if (now.hour >= 23 and now.minute >= 30) and (now.hour <= 0 and now.minute <= 30):
-            return
-
-        self.bank.renew_session()
 
     @tasks.loop(minutes=1)
     async def send_report_job(self):
