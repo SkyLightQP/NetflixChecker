@@ -26,7 +26,9 @@ class Bot(commands.Bot):
         raise Exception(args[0])
 
     async def on_disconnect(self):
-        self.bank.driver.quit()
+        if self.bank.driver is not None:
+            self.bank.driver.quit()
+            self.bank.driver = None
 
     @tasks.loop(hours=6)
     async def check_account_log_job(self):

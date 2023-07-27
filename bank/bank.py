@@ -15,7 +15,6 @@ BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
 ONLY_UPPERCASE = re.compile("\b[A-Z]\b")
 ButtonType = Literal["shift", "char", "normal"]
 MAX_RETRY = 3
-BUTTON_DELAY = 0.7
 BUTTON_DELAY = 0.5
 WAIT_TIME = 20
 
@@ -72,6 +71,8 @@ class Bank:
 
         self.driver.find_element(By.XPATH, '//*[@id="ibx_loginId"]').send_keys(self.bank_id)
         self.driver.find_element(By.XPATH, '//*[@id="비밀번호"]').click()
+
+        time.sleep(BUTTON_DELAY)
 
         for i in self.bank_password:
             if i.isupper():
@@ -157,7 +158,8 @@ class Bank:
         self.__login()
         self.__select_account()
         self.__refresh()
-        self.driver.close()
+        self.driver.quit()
+        self.driver = None
 
     def get_data(self) -> List[BankData]:
         return self.__data
