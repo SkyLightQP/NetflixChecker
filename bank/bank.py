@@ -16,6 +16,7 @@ ONLY_UPPERCASE = re.compile("\b[A-Z]\b")
 ButtonType = Literal["shift", "char", "normal"]
 MAX_RETRY = 3
 BUTTON_DELAY = 0.7
+BUTTON_DELAY = 0.5
 WAIT_TIME = 20
 
 
