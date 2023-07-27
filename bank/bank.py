@@ -122,7 +122,10 @@ class Bank:
             self.__data = []
             original = self.driver.find_elements(By.CSS_SELECTOR, '#F01_grd_list_body_tbody > tr')
             for i in range(0, len(original)):
-                self.driver.find_element(By.XPATH, f'//*[@id="F01_grd_list_cell_{i}_11"]/nobr/a').click()
+                each_element = self.driver.find_element(By.XPATH, f'//*[@id="F01_grd_list_cell_{i}_11"]/nobr/a')
+                if each_element is None:
+                    continue
+                each_element.click()
                 self.driver.switch_to.frame(
                     self.driver.find_element(By.XPATH, '/html/body/div[7]/div[2]/div[1]/iframe'))
                 html = self.driver.find_element(By.XPATH, '//*[@id="M01_gen0"]').get_attribute('innerHTML')
