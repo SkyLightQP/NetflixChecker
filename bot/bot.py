@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands, tasks
 
 from bank import Bank
+from code import CodeChecker
 from common import logger, Config, Session
 from models import Log
 
@@ -14,6 +15,7 @@ class Bot(commands.Bot):
     def __init__(self, **options):
         super().__init__(**options)
         self.bank = Bank()
+        self.mail = CodeChecker()
 
     async def on_ready(self):
         logger.info("[BOT] Start discord bot successfully.")
@@ -21,6 +23,8 @@ class Bot(commands.Bot):
         self.check_account_log_job.start()
         self.send_report_job.start()
         logger.info("[JOB] Register schedule job.")
+
+        await self.check_email_and_send_netflix_code()
 
     async def on_error(self, event, *args, **kwargs):
         raise Exception(args[0])
@@ -79,3 +83,15 @@ class Bot(commands.Bot):
                                                     description='입금 내역이 없습니다.',
                                                     color=0xF93A2F))
             session.close()
+
+    async def check_email_and_send_netflix_code(self):
+        channel = discord.utils.get(self.get_all_channels(), id=int(self.config.discord_channel))
+        url = self.mail.get_netflix_code_url()
+
+        if url is None:
+            pass
+
+        embed = discord.Embed(title=f"넷플릭스 인증코드",
+                              description=f"{url} 에서 계정 인증을 완료하세요.",
+                              color=0xF93A2F)
+        await channel.send(embed=embed)
