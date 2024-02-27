@@ -17,5 +17,11 @@
     "host": "",
     "use_headless": false
   },
+  "pop": {
+    "host": "",
+    "port": 995,
+    "user": "",
+    "password": ""
+  },
   "dsn": ""
 }

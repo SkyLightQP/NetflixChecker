@@ -27,6 +27,10 @@ class Config:
                                       selenium_use_remote=bool(data['selenium']['use_remote']),
                                       selenium_host=data['selenium']['host'],
                                       selenium_use_headless=bool(data['selenium']['use_headless']),
+                                      pop_host=data['pop']['host'],
+                                      pop_port=int(data['pop']['port']),
+                                      pop_user=data['pop']['user'],
+                                      pop_password=data['pop']['password'],
                                       dsn=data['dsn']
                                       )
         return self.config

@@ -17,4 +17,9 @@ class ConfigModel:
     selenium_host: str
     selenium_use_headless: bool
 
+    pop_host: str
+    pop_port: int
+    pop_user: str
+    pop_password: str
+
     dsn: str
