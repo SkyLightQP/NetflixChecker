@@ -1,0 +1,21 @@
+discord:
+  bot-token:
+  channel:
+  admin:
+    -
+bank:
+  cost:
+  site-id:
+  site-password:
+  account-password:
+selenium:
+  use-remote: false
+  host:
+  use-headless: false
+pop3:
+  host:
+  port: 995
+  user:
+  password:
+sentry:
+  dsn:
