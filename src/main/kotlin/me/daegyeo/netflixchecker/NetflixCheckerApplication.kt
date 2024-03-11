@@ -3,23 +3,24 @@ package me.daegyeo.netflixchecker
 import discord4j.core.DiscordClientBuilder
 import discord4j.core.GatewayDiscordClient
 import discord4j.rest.RestClient
-import org.springframework.beans.factory.annotation.Value
+import me.daegyeo.netflixchecker.config.DiscordConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
+
 
 fun main(args: Array<String>) {
     runApplication<NetflixCheckerApplication>(*args)
 }
 
 @SpringBootApplication
-class NetflixCheckerApplication {
-    @Value("\${token}")
-    private lateinit var token: String
+@ConfigurationPropertiesScan
+class NetflixCheckerApplication(private val discordConfiguration: DiscordConfiguration) {
 
     @Bean
     fun gatewayDiscordClient(): GatewayDiscordClient? {
-        return DiscordClientBuilder.create(token)
+        return DiscordClientBuilder.create(discordConfiguration.botToken)
             .build()
             .login()
             .block()
