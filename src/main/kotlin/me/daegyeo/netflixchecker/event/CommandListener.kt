@@ -14,7 +14,7 @@ class CommandListener(
 
     override fun execute(event: ChatInputInteractionEvent): Mono<Void> {
         return Flux.fromIterable(commandRegistry)
-            .filter { it.getName() == event.commandName }
+            .filter { it.name == event.commandName }
             .next()
             .flatMap { it.handle(event) }
     }

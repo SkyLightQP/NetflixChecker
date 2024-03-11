@@ -24,9 +24,9 @@ class CommandRegistrar(
         commandRegistry.forEach {
             commands.add(
                 ApplicationCommandRequest.builder()
-                    .name(it.getName())
-                    .description(it.getDescription())
-                    .addAllOptions(it.getOptions().map { option ->
+                    .name(it.name)
+                    .description(it.description)
+                    .addAllOptions(it.options.map { option ->
                         ApplicationCommandOptionData.builder()
                             .name(option.name)
                             .description(option.description)

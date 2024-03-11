@@ -6,11 +6,11 @@ import reactor.core.publisher.Mono
 
 
 interface ICommand {
-    fun getName(): String
+    val name: String
 
-    fun getDescription(): String
+    val description: String
 
-    fun getOptions(): List<CommandOption>
+    val options: List<CommandOption>
 
     fun handle(event: ChatInputInteractionEvent): Mono<Void>
 }
