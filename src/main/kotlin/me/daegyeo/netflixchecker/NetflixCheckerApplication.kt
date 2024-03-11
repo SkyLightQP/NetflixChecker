@@ -2,8 +2,10 @@ package me.daegyeo.netflixchecker
 
 import discord4j.core.DiscordClientBuilder
 import discord4j.core.GatewayDiscordClient
+import discord4j.core.event.domain.Event
 import discord4j.rest.RestClient
 import me.daegyeo.netflixchecker.config.DiscordConfiguration
+import me.daegyeo.netflixchecker.event.EventListener
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.runApplication
@@ -19,11 +21,20 @@ fun main(args: Array<String>) {
 class NetflixCheckerApplication(private val discordConfiguration: DiscordConfiguration) {
 
     @Bean
-    fun gatewayDiscordClient(): GatewayDiscordClient? {
-        return DiscordClientBuilder.create(discordConfiguration.botToken)
+    fun <T : Event> gatewayDiscordClient(eventListeners: List<EventListener<T>>): GatewayDiscordClient? {
+        val client = DiscordClientBuilder.create(discordConfiguration.botToken)
             .build()
             .login()
             .block()
+
+        for (listener in eventListeners) {
+            client!!.on(listener.eventType)
+                .flatMap(listener::execute)
+                .onErrorResume(listener::handleError)
+                .subscribe()
+        }
+
+        return client
     }
 
     @Bean
