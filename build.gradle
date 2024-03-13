@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id 'org.springframework.boot' version '3.2.3'
@@ -38,6 +38,7 @@ dependencies {
     implementation 'org.jetbrains.exposed:exposed-json:0.48.0'
     implementation 'org.jetbrains.exposed:exposed-money:0.48.0'
     implementation 'org.jetbrains.exposed:exposed-spring-boot-starter:0.48.0'
+    implementation 'org.xerial:sqlite-jdbc:3.44.1.0'
 
     compileOnly 'org.projectlombok:lombok'
 
