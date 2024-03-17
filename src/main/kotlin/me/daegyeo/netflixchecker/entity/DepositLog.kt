@@ -10,5 +10,5 @@ class DepositLog(id: EntityID<Int>) : IntEntity(id) {
 
     var who by DepositLogs.who
     var cost by DepositLogs.cost
-    var time by DepositLogs.time
+    var date by DepositLogs.date
 }
