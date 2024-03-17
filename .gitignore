@@ -3,7 +3,7 @@ chromedriver.exe
 config.json
 config.yaml
 data/data.db
-data/data.mv.db
+data/data.*.db
 
 .gradle/
 build/
