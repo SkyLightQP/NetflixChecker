@@ -1,4 +1,4 @@
-package me.daegyeo.netflixchecker.event
+package me.daegyeo.netflixchecker.listener
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import me.daegyeo.netflixchecker.command.Command

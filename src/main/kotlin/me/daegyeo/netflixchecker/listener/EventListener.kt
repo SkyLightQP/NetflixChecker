@@ -1,4 +1,4 @@
-package me.daegyeo.netflixchecker.event
+package me.daegyeo.netflixchecker.listener
 
 import discord4j.core.event.domain.Event
 import org.slf4j.Logger

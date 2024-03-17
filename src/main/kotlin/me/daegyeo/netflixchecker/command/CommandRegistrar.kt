@@ -39,8 +39,9 @@ class CommandRegistrar(
         }
 
         applicationService.bulkOverwriteGlobalApplicationCommand(applicationId!!, commands)
-            .doOnNext { logger.info("명령어를 등록했습니다.") }
             .doOnError { logger.error("명령어를 등록하는 중 오류가 발생했습니다.", it) }
             .subscribe()
+
+        logger.info("명령어 ${commands.size}개를 등록했습니다.")
     }
 }
