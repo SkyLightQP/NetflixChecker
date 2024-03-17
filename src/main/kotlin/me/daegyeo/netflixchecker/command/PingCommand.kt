@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
 @Component
-class PingCommand : ICommand {
+class PingCommand : Command {
     override val name: String = "ping"
 
     override val description: String = "Ping the bot."

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 @Component
 class CommandRegistrar(
     private val restClient: RestClient,
-    private val commandRegistry: List<ICommand>
+    private val commandRegistry: List<Command>
 ) : ApplicationRunner {
     private val logger = LoggerFactory.getLogger(CommandRegistrar::class.java)
 

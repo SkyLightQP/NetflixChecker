@@ -5,7 +5,7 @@ import reactor.core.publisher.Mono
 
 
 
-interface ICommand {
+interface Command {
     val name: String
 
     val description: String

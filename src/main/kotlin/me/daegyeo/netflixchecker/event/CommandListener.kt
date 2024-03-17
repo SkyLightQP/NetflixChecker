@@ -1,14 +1,14 @@
 package me.daegyeo.netflixchecker.event
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
-import me.daegyeo.netflixchecker.command.ICommand
+import me.daegyeo.netflixchecker.command.Command
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Component
 class CommandListener(
-    private val commandRegistry: List<ICommand>
+    private val commandRegistry: List<Command>
 ) : EventListener<ChatInputInteractionEvent> {
     override val eventType = ChatInputInteractionEvent::class.java
 
