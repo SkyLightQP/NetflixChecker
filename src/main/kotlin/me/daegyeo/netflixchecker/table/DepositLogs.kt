@@ -5,5 +5,5 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 object DepositLogs : IntIdTable() {
     val who = varchar("who", length = 30)
     val cost = integer("cost")
-    val date = integer("date")
+    val date = varchar("date", length = 11)
 }
