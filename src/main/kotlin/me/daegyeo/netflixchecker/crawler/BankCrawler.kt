@@ -22,8 +22,7 @@ enum class ButtonType {
 
 @Component
 class BankCrawler(
-    private val seleniumConfiguration: SeleniumConfiguration,
-    private val bankConfiguration: BankConfiguration
+    private val seleniumConfiguration: SeleniumConfiguration, private val bankConfiguration: BankConfiguration
 ) {
     private val DRIVER_NAME = "webdriver.chrome.driver"
     private val DRIVER_PATH = "chromedriver.exe"
@@ -154,16 +153,15 @@ class BankCrawler(
             driver.findElement(elementXPath).click()
 
             driver.switchTo().frame(driver.findElement(By.xpath("/html/body/div[7]/div[2]/div[1]/iframe")))
-
             val accountDetailXPath = By.xpath("//*[@id=\"M01_gen0\"]")
             delayUntilClickable(WAIT_SECONDS, accountDetailXPath)
             val accountDetail = driver.findElement(accountDetailXPath)
-            val accountDetailHtml = Jsoup.parse(accountDetail.getAttribute("innerHTML"))
-            val date = accountDetailHtml.selectFirst("#wq_uuid_41 > span")?.text()
-            val time = accountDetailHtml.selectFirst("#wq_uuid_46 > span")?.text()
-            val cost = accountDetailHtml.selectFirst("#wq_uuid_61 > span")?.text()
+            val accountDetailHtml = Jsoup.parse(accountDetail.getAttribute("innerHTML")).body()
+            val date = accountDetailHtml.selectXpath("span[2]").text()
+            val time = accountDetailHtml.selectXpath("span[4]").text()
+            val cost = accountDetailHtml.selectXpath("span[8]").text()
             val normalizeCost = cost?.replace(",", "")?.toInt()
-            val who = accountDetailHtml.selectFirst("#wq_uuid_66 > span")?.text()
+            val who = accountDetailHtml.selectXpath("span[12]").text()
 
             if (normalizeCost != 0) {
                 val bankCostX2 = bankConfiguration.cost * 2
@@ -172,12 +170,12 @@ class BankCrawler(
                 when {
                     normalizeCost == bankConfiguration.cost -> result.add(
                         AccountData(
-                            time!!, date!!, cost, who!!, "1"
+                            time, date, cost, who, "1"
                         )
                     )
 
-                    normalizeCost == bankCostX2 -> result.add(AccountData(time!!, date!!, cost, who!!, "2"))
-                    normalizeCost == bankCostX3 -> result.add(AccountData(time!!, date!!, cost, who!!, "3"))
+                    normalizeCost == bankCostX2 -> result.add(AccountData(time, date, cost, who, "2"))
+                    normalizeCost == bankCostX3 -> result.add(AccountData(time, date, cost, who, "3"))
                 }
             }
 
@@ -194,11 +192,11 @@ class BankCrawler(
         return result
     }
 
-    fun crawl() {
+    fun crawl(): List<AccountData> {
         driver.get(BANK_URL)
         loginBank()
         selectBankAccount()
-        getAccountData()
+        return getAccountData()
     }
 
     fun closeBrowser() = driver.quit()
