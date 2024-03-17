@@ -30,7 +30,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
     implementation 'org.jetbrains.exposed:exposed-spring-boot-starter:0.48.0'
-    implementation 'org.xerial:sqlite-jdbc:3.44.1.0'
+    implementation 'com.h2database:h2:2.2.224'
 
     compileOnly 'org.projectlombok:lombok'
 
