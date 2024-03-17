@@ -11,7 +11,7 @@ data class DiscordConfiguration(
 
 @ConfigurationProperties(prefix = "bank")
 data class BankConfiguration(
-    val cost: String = "",
+    val cost: Int = 0,
     val siteId: String = "",
     val sitePassword: String = "",
     val accountPassword: String = ""
