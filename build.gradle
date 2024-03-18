@@ -34,10 +34,6 @@ dependencies {
     implementation 'org.seleniumhq.selenium:selenium-java:4.1.1'
     implementation 'org.jsoup:jsoup:1.17.1'
 
-    compileOnly 'org.projectlombok:lombok'
-
-    annotationProcessor 'org.projectlombok:lombok'
-
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
