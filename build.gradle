@@ -33,6 +33,7 @@ dependencies {
     implementation 'com.h2database:h2:2.2.224'
     implementation 'org.seleniumhq.selenium:selenium-java:4.1.1'
     implementation 'org.jsoup:jsoup:1.17.1'
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
