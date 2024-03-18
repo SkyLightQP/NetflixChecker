@@ -1,9 +1,9 @@
 chromedriver
 chromedriver.exe
-config.json
-config.yaml
 data/data.db
 data/data.*.db
+data/logs/
+.env
 
 .gradle/
 build/
