@@ -159,7 +159,7 @@ class BankCrawler(
             val accountDetailHtml = Jsoup.parse(accountDetail.getAttribute("innerHTML")).body()
             val date = accountDetailHtml.selectXpath("span[2]").text()
             val time = accountDetailHtml.selectXpath("span[4]").text()
-            val cost = accountDetailHtml.selectXpath("span[8]").text()
+            val cost = accountDetailHtml.selectXpath("span[10]").text()
             val normalizeCost = cost?.replace(",", "")?.toInt()
             val who = accountDetailHtml.selectXpath("span[12]").text()
 
@@ -170,12 +170,12 @@ class BankCrawler(
                 when {
                     normalizeCost == bankConfiguration.cost -> result.add(
                         AccountData(
-                            time, date, cost, who, "1"
+                            time, date, normalizeCost.toString(), who, "1"
                         )
                     )
 
-                    normalizeCost == bankCostX2 -> result.add(AccountData(time, date, cost, who, "2"))
-                    normalizeCost == bankCostX3 -> result.add(AccountData(time, date, cost, who, "3"))
+                    normalizeCost == bankCostX2 -> result.add(AccountData(time, date, normalizeCost.toString(), who, "2"))
+                    normalizeCost == bankCostX3 -> result.add(AccountData(time, date, normalizeCost.toString(), who, "3"))
                 }
             }
 
@@ -184,9 +184,9 @@ class BankCrawler(
         }
 
         if (result.isEmpty()) {
-            logger.info("신규 입금 정보가 없습니다.")
+            logger.info("입금 정보가 없습니다.")
         } else {
-            logger.info("신규 입금 정보 ${result.size}개를 찾았습니다.")
+            logger.info("입금 정보 ${result.size}개를 찾았습니다.")
         }
 
         return result
