@@ -125,7 +125,7 @@ class BankCrawler(
         logger.info("은행 로그인을 완료했습니다.")
     }
 
-    fun selectBankAccount() {
+    private fun selectBankAccount() {
         driver.findElement(By.xpath("//*[@class=\"w2textbox mt5\"]")).click()
         driver.findElement(By.xpath("//*[@id=\"sbx_accno_input_0\"]/option[2]")).click()
         driver.findElement(By.xpath("//*[@id=\"계좌비밀번호\"]")).click()
@@ -143,7 +143,7 @@ class BankCrawler(
         logger.info("은행 계좌를 찾았습니다.")
     }
 
-    fun getAccountData(): List<AccountData> {
+    private fun getAccountData(): List<AccountData> {
         val result = arrayListOf<AccountData>()
         val original = driver.findElements(By.cssSelector("#F01_grd_list_body_tbody > tr"))
 
