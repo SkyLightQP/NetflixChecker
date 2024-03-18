@@ -13,6 +13,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerA
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
+import org.springframework.scheduling.annotation.EnableScheduling
 
 
 fun main(args: Array<String>) {
@@ -25,6 +26,7 @@ fun main(args: Array<String>) {
     value = [ExposedAutoConfiguration::class],
     exclude = [DataSourceTransactionManagerAutoConfiguration::class]
 )
+@EnableScheduling
 class NetflixCheckerApplication(private val discordConfiguration: DiscordConfiguration) {
 
     @Bean
