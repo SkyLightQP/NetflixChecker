@@ -10,6 +10,7 @@ import me.daegyeo.netflixchecker.table.DepositLogs
 import me.daegyeo.netflixchecker.util.EmbedUtil
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -23,12 +24,15 @@ import java.util.*
 class BankAlert(
     private val gatewayDiscordClient: GatewayDiscordClient, private val discordConfiguration: DiscordConfiguration
 ) {
+    private val logger = LoggerFactory.getLogger(BankAlert::class.java)
+
     @EventListener
     fun sendDepositLogAlert(event: CompletedBankCrawlEvent) {
         val channel = gatewayDiscordClient.getChannelById(Snowflake.of(discordConfiguration.channel))
             .ofType(GuildMessageChannel::class.java).block()!!
 
         transaction {
+            var count = 0
             event.data.forEach {
                 val log = DepositLog.find {
                     (DepositLogs.date eq it.date) and (DepositLogs.who eq it.who)
@@ -47,8 +51,11 @@ class BankAlert(
                         cost = it.cost.toInt()
                         date = it.date
                     }
+
+                    count++
                 }
             }
+            logger.info("새로운 입금 알림 ${count}건을 발송하였습니다.")
         }
     }
 
