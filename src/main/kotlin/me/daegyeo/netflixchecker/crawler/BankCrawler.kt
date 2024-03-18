@@ -186,7 +186,7 @@ class BankCrawler(
         if (result.isEmpty()) {
             logger.info("입금 정보가 없습니다.")
         } else {
-            logger.info("입금 정보 ${result.size}개를 찾았습니다.")
+            logger.info("입금 정보 ${result.size}건를 찾았습니다.")
         }
 
         return result
