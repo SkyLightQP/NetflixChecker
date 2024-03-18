@@ -1,4 +1,5 @@
-# NetflixChecker ![works badge](https://cdn.jsdelivr.net/gh/nikku/works-on-my-machine@v0.2.0/badge.svg)
+# NetflixChecker ![works badge](https://cdn.jsdelivr.net/gh/nikku/works-on-my-machine@v0.2.0/badge.svg) ![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?logo=kotlin&logoColor=white) ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?logo=spring&logoColor=white)
+
 <br/>
 <div align="center">
 넷플릭스 입금 확인을 대신 해줍니다
@@ -15,22 +16,46 @@
 ## 시작하기
 
 ```shell
-pip install -r requirements.txt
+cp .env.example .env
 ```
 
 ```shell
-cp config.json.example config.json
+docker build -t netflixchecker .
+
+docker run --env-file=.env -v ./data:/workspace/data --name netflixchecker -d netflixchecker 
 ```
 
 ## 데이터베이스 구축하기 
 
-데이터베이스는 SQLite를 사용합니다. `.db` 파일을 만들면 최초 실행 시 자동으로 테이블을 생성합니다.
+H2 데이터베이스를 사용합니다.
 
-```shell
-touch data.db
+데이터베이스 테이블이 없다면 봇 시작 시 자동으로 생성합니다.
+
+## 환경변수
+
+```dotenv
+# 디스코드 봇 설정
+DISCORD_BOT_TOKEN=
+DISCORD_CHANNEL_ID=
+DISCORD_ADMIN_ID=
+
+# 은행 계정 및 계좌 정보
+BANK_COST=
+BANK_SITE_ID=
+BANK_SITE_PASSWORD=
+BANK_ACCOUNT_PASSWORD=
+
+# Selenium 정보
+SELENIUM_USE_REMOTE=false
+SELENIUM_REMOTE_HOST=
+SELENIUM_USE_HEADLESS=false
+
+# POP3 정보
+POP3_HOST=
+POP3_PORT=995
+POP3_USERNAME=
+POP3_PASSWORD=
+
+# Sentry
+SENTRY_DSN=
 ```
-
-## TODO
-
-- [ ] 민감한 정보을 안전하게 저장하도록 변경
-- [ ] 자동배포
