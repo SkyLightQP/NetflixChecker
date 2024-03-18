@@ -160,7 +160,7 @@ class BankCrawler(
             val date = accountDetailHtml.selectXpath("span[2]").text()
             val time = accountDetailHtml.selectXpath("span[4]").text()
             val cost = accountDetailHtml.selectXpath("span[10]").text()
-            val normalizeCost = cost?.replace(",", "")?.toInt()
+            val normalizeCost = cost.replace(",", "").toInt()
             val who = accountDetailHtml.selectXpath("span[12]").text()
 
             if (normalizeCost != 0) {
