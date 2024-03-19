@@ -28,7 +28,7 @@ class BankCrawler(
     private val DRIVER_PATH = "chromedriver.exe"
     private val BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
     private val WAIT_SECONDS: Long = 10
-    private val BUTTON_WAIT_SECONDS: Long = 2
+    private val BUTTON_WAIT_SECONDS: Long = 5
 
     lateinit var driver: WebDriver
 
