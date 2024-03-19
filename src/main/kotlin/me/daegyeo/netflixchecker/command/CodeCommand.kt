@@ -24,7 +24,7 @@ class CodeCommand(private val codeCrawler: CodeCrawler) : Command {
         val result = codeCrawler.getVerificationCode()
 
         if (result.text == "" && result.link == "") {
-            return event.editReply("인증코드를 가져오는데 실패했습니다.").then()
+            return event.editReply("최근 발송된 인증코드가 없습니다.").then()
         }
 
         val embed = EmbedUtil.create(
