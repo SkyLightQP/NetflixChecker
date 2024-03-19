@@ -16,5 +16,3 @@ pop3:
   port: ${POP3_PORT}
   user: ${POP3_USERNAME}
   password: ${POP3_PASSWORD}
-sentry:
-  dsn: ${SENTRY_DSN}

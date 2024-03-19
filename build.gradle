@@ -1,10 +1,11 @@
- import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id 'org.springframework.boot' version '3.2.3'
     id 'io.spring.dependency-management' version '1.1.4'
     id 'org.jetbrains.kotlin.jvm' version '1.9.22'
     id 'org.jetbrains.kotlin.plugin.spring' version '1.9.22'
+    id 'io.sentry.jvm.gradle' version "4.3.1"
 }
 
 group = 'me.daegyeo'
@@ -35,6 +36,7 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.17.1'
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
     implementation 'com.sun.mail:javax.mail:1.6.2'
+    implementation 'io.sentry:sentry-spring-boot-starter-jakarta:7.6.0'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
