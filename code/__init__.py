@@ -1,1 +1,0 @@
-from .CodeChecker import *

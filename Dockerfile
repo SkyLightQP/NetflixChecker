@@ -1,10 +1,18 @@
-FROM python:3.10
+FROM gradle:8.6.0-jdk21-alpine AS builder
 
-COPY / /workspace
 WORKDIR /workspace
+COPY build.gradle settings.gradle ./
+RUN gradle build -x test --parallel --continue > /dev/null 2>&1 || true
 
-RUN pip install -r requirements.txt
+COPY ./src /workspace/src
+RUN gradle build -x test --parallel
 
-VOLUME ["/workspace/app.log", "/workspace/config.json", "/workspace/data.db", "/workspace/chromedriver"]
+FROM eclipse-temurin:21-alpine
 
-CMD ["python", "main.py"]
+COPY --from=builder /workspace/build/libs/NetflixChecker-0.0.1-SNAPSHOT.jar ./app.jar
+
+ENV TZ Asia/Seoul
+
+VOLUME ["/data"]
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

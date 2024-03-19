@@ -1,0 +1,11 @@
+spring:
+  config:
+    import:
+      - config.yaml
+  exposed:
+    generate-ddl: true
+  datasource:
+    url: jdbc:h2:./data/data
+    driver-class-name: org.h2.Driver
+sentry:
+  dsn: ${SENTRY_DSN}

@@ -1,0 +1,53 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+    id 'org.springframework.boot' version '3.2.3'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.22'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.9.22'
+    id 'io.sentry.jvm.gradle' version "4.3.1"
+}
+
+group = 'me.daegyeo'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = '17'
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.discord4j:discord4j-core:3.2.5'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect'
+    implementation 'org.jetbrains.exposed:exposed-spring-boot-starter:0.48.0'
+    implementation 'com.h2database:h2:2.2.224'
+    implementation 'org.seleniumhq.selenium:selenium-java:4.1.1'
+    implementation 'org.jsoup:jsoup:1.17.1'
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+    implementation 'com.sun.mail:javax.mail:1.6.2'
+    implementation 'io.sentry:sentry-spring-boot-starter-jakarta:7.6.0'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.withType(KotlinCompile).configureEach {
+    kotlinOptions {
+        freeCompilerArgs += '-Xjsr305=strict'
+        jvmTarget = '17'
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
