@@ -17,7 +17,7 @@ data class BankConfiguration(
     val accountPassword: String = ""
 )
 
-@ConfigurationProperties(prefix = "selenuim")
+@ConfigurationProperties(prefix = "selenium")
 data class SeleniumConfiguration(
     val useRemote: Boolean = false,
     val host: String = "",
