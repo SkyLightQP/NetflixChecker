@@ -40,7 +40,7 @@ class CodeCrawler(private val pop3Configuration: Pop3Configuration) {
         inbox.open(Folder.READ_ONLY)
         val messages = inbox.messages
 
-        for (i in messages.size - 1 downTo 0) {
+        for (i in messages.size - 1 downTo (messages.size - 10).coerceAtLeast(0)) {
             val message = messages[i]
             val content = message.content
             if (message.subject != EMAIL_SUBJECT || message.from[0].toString() != EMAIL_FROM) {
