@@ -14,7 +14,7 @@ class CrawlCommand(
 ) : Command {
     override val name: String = "crawl"
 
-    override val description: String = "Crawl the bank account manually."
+    override val description: String = "(관리자) 수동으로 입금 정보를 가져옵니다."
 
     override val options: List<CommandOption> = arrayListOf()
 

@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono
 class CodeCommand(private val codeCrawler: CodeCrawler) : Command {
     override val name: String = "code"
 
-    override val description: String = "Get the verification code of netflix."
+    override val description: String = "최근 넷플릭스 인증코드를 확인합니다."
 
     override val options: List<CommandOption> = arrayListOf()
 
