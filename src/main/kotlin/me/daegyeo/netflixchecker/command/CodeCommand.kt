@@ -17,7 +17,7 @@ class CodeCommand(private val codeCrawler: CodeCrawler) : Command {
 
     override fun handle(event: ChatInputInteractionEvent): Mono<Void> {
         event.reply()
-            .withEphemeral(true)
+            .withEphemeral(false)
             .withContent("인증코드를 가져오는 중...")
             .block()
 

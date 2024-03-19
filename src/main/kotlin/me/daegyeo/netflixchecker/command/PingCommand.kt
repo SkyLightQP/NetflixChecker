@@ -14,7 +14,7 @@ class PingCommand : Command {
 
     override fun handle(event: ChatInputInteractionEvent): Mono<Void> {
         return event.reply()
-            .withEphemeral(true)
+            .withEphemeral(false)
             .withContent("Pong!")
             .then()
     }
