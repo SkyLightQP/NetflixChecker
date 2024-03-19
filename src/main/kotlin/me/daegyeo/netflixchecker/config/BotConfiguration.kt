@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class DiscordConfiguration(
     val botToken: String = "",
     val channel: String = "",
-    val admin: Array<String> = arrayOf()
+    val admin: String = ""
 )
 
 @ConfigurationProperties(prefix = "bank")
