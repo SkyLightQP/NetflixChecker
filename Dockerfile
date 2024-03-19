@@ -13,6 +13,6 @@ COPY --from=builder /workspace/build/libs/NetflixChecker-0.0.1-SNAPSHOT.jar ./ap
 
 ENV TZ Asia/Seoul
 
-VOLUME ["/data"]
+VOLUME ["/workspace/data"]
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
