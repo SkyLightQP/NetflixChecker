@@ -9,6 +9,7 @@ RUN gradle build -x test --parallel
 
 FROM eclipse-temurin:21-alpine
 
+WORKDIR /workspace
 COPY --from=builder /workspace/build/libs/NetflixChecker-0.0.1-SNAPSHOT.jar ./app.jar
 
 ENV TZ Asia/Seoul
