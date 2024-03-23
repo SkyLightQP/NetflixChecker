@@ -39,6 +39,9 @@ class CrawlCommand(
 
         applicationEventPublisher.publishEvent(CompletedBankCrawlEvent(result))
 
+        if (result.isEmpty()) {
+            return event.editReply("입금 정보가 없거나 크롤링을 실패했습니다.").then()
+        }
         return event.editReply("성공적으로 입금 정보를 가져왔습니다!").then()
     }
 }

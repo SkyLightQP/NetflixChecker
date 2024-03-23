@@ -55,6 +55,8 @@ class BankCrawler(
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(WAIT_SECONDS))
     }
 
+    fun closeBrowser() = driver.quit()
+
     private fun delayUntilClickable(seconds: Long, locator: By) =
         WebDriverWait(driver, Duration.ofSeconds(seconds)).until(ExpectedConditions.elementToBeClickable(locator))
 
@@ -174,8 +176,17 @@ class BankCrawler(
                         )
                     )
 
-                    normalizeCost == bankCostX2 -> result.add(AccountData(time, date, normalizeCost.toString(), who, "2"))
-                    normalizeCost == bankCostX3 -> result.add(AccountData(time, date, normalizeCost.toString(), who, "3"))
+                    normalizeCost == bankCostX2 -> result.add(
+                        AccountData(
+                            time, date, normalizeCost.toString(), who, "2"
+                        )
+                    )
+
+                    normalizeCost == bankCostX3 -> result.add(
+                        AccountData(
+                            time, date, normalizeCost.toString(), who, "3"
+                        )
+                    )
                 }
             }
 
@@ -193,11 +204,15 @@ class BankCrawler(
     }
 
     fun crawl(): List<AccountData> {
-        driver.get(BANK_URL)
-        loginBank()
-        selectBankAccount()
-        return getAccountData()
+        try {
+            driver.get(BANK_URL)
+            loginBank()
+            selectBankAccount()
+            return getAccountData()
+        } catch (e: Exception) {
+            logger.error("은행 크롤링 중 오류가 발생했습니다. 브라우저를 닫습니다.", e)
+            closeBrowser()
+            return emptyList()
+        }
     }
-
-    fun closeBrowser() = driver.quit()
 }

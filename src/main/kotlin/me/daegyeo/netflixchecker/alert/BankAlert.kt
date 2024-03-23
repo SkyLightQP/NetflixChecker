@@ -31,6 +31,8 @@ class BankAlert(
         val channel = gatewayDiscordClient.getChannelById(Snowflake.of(discordConfiguration.channel))
             .ofType(GuildMessageChannel::class.java).block()!!
 
+        if (event.data.isEmpty()) return
+
         transaction {
             var count = 0
             event.data.forEach {
