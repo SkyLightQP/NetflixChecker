@@ -14,7 +14,7 @@ class CrawlCommand(
     private val applicationEventPublisher: ApplicationEventPublisher,
     private val discordConfiguration: DiscordConfiguration
 ) : Command {
-    override val name: String = "crawl"
+    override val name: String = "크롤링"
 
     override val description: String = "(관리자) 수동으로 입금 정보를 가져옵니다."
 

@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono
 
 @Component
 class CodeCommand(private val codeCrawler: CodeCrawler) : Command {
-    override val name: String = "code"
+    override val name: String = "인증코드"
 
     override val description: String = "최근 넷플릭스 인증코드를 확인합니다."
 

@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono
 
 @Component
 class PingCommand : Command {
-    override val name: String = "ping"
+    override val name: String = "핑"
 
     override val description: String = "봇의 작동 상태를 확인합니다."
 
