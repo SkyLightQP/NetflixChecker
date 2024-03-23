@@ -1,10 +1,9 @@
 # NetflixChecker ![works badge](https://cdn.jsdelivr.net/gh/nikku/works-on-my-machine@v0.2.0/badge.svg) ![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?logo=kotlin&logoColor=white) ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?logo=spring&logoColor=white)
 
 <br/>
-<center>
+<p align="center">
 <img src="./docs/logo.png" width="200" />
-</center>
-<br/>
+</p>
 <div align="center">
 넷플릭스 입금 확인을 대신 해줍니다
   
@@ -18,6 +17,8 @@
 - **은행 계좌번호 등 민감한 정보를 평문으로 저장하고 있습니다.**
 
 ## 시작하기
+
+- `ChromeDriver`가 필요합니다.
 
 ```shell
 cp .env.example .env
