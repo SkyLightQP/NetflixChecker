@@ -63,4 +63,7 @@ POP3_PASSWORD=
 
 # Sentry
 SENTRY_DSN=
+
+# API JWT Secret
+JWT_SECRET=
 ```
