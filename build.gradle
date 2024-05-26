@@ -28,6 +28,7 @@ repositories {
 dependencies {
     implementation 'com.discord4j:discord4j-core:3.2.5'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
     implementation 'org.jetbrains.exposed:exposed-spring-boot-starter:0.48.0'
