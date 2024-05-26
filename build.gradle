@@ -46,7 +46,7 @@ dependencies {
     implementation 'io.github.jan-tennert.supabase:gotrue-kt'
     implementation 'io.github.jan-tennert.supabase:postgrest-kt'
     implementation 'io.github.jan-tennert.supabase:serializer-jackson'
-    implementation 'io.ktor:ktor-client-jvm:2.3.11'
+    implementation 'io.ktor:ktor-client-apache:2.3.11'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
