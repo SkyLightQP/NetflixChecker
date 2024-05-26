@@ -36,3 +36,9 @@ data class Pop3Configuration(
 data class SentryConfiguration(
     val dsn: String = "",
 )
+
+@ConfigurationProperties(prefix = "supabase")
+data class SupabaseConfiguration(
+    val url: String = "",
+    val key: String = ""
+)

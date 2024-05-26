@@ -17,3 +17,6 @@ pop3:
   user: ${POP3_USERNAME}
   password: ${POP3_PASSWORD}
 jwt-secret: ${JWT_SECRET}
+supabase:
+  url: ${SUPABASE_URL}
+  key: ${SUPABASE_ANON_KEY}
