@@ -37,6 +37,9 @@ dependencies {
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
     implementation 'com.sun.mail:javax.mail:1.6.2'
     implementation 'io.sentry:sentry-spring-boot-starter-jakarta:7.6.0'
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
