@@ -19,4 +19,4 @@ pop3:
 jwt-secret: ${JWT_SECRET}
 supabase:
   url: ${SUPABASE_URL}
-  key: ${SUPABASE_ANON_KEY}
+  key: ${SUPABASE_SECRET_KEY}
