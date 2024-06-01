@@ -2,7 +2,6 @@ package me.daegyeo.netflixchecker.api.controller
 
 import me.daegyeo.netflixchecker.api.controller.dto.AuthLoginRequest
 import me.daegyeo.netflixchecker.api.service.AuthService
-import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -15,8 +14,7 @@ class AuthController(private val authService: AuthService) {
     }
 
     @DeleteMapping("/logout")
-    suspend fun login(): ResponseStatus {
+    suspend fun logout() {
         authService.logout()
-        return ResponseStatus(HttpStatus.OK)
     }
 }
