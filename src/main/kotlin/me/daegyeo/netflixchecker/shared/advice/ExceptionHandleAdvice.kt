@@ -1,4 +1,4 @@
-package me.daegyeo.netflixchecker.advice
+package me.daegyeo.netflixchecker.shared.advice
 
 import me.daegyeo.netflixchecker.api.exception.ServiceException
 import org.springframework.http.HttpStatus

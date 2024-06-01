@@ -7,7 +7,7 @@ import me.daegyeo.netflixchecker.config.DiscordConfiguration
 import me.daegyeo.netflixchecker.entity.DepositLog
 import me.daegyeo.netflixchecker.event.CompletedBankCrawlEvent
 import me.daegyeo.netflixchecker.table.DepositLogs
-import me.daegyeo.netflixchecker.util.EmbedUtil
+import me.daegyeo.netflixchecker.shared.util.EmbedUtil
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
