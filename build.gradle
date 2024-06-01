@@ -30,8 +30,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
-    implementation 'org.jetbrains.exposed:exposed-spring-boot-starter:0.48.0'
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+
+    implementation 'org.jetbrains.exposed:exposed-spring-boot-starter:0.51.0'
+    implementation 'org.jetbrains.exposed:exposed-java-time:0.51.0'
+    implementation 'org.postgresql:postgresql:42.7.1'
 
     implementation 'com.discord4j:discord4j-core:3.2.5'
 
@@ -39,8 +42,6 @@ dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-reactor'
     implementation 'io.projectreactor.kotlin:reactor-kotlin-extensions'
-
-    implementation 'com.h2database:h2:2.2.224'
 
     implementation 'org.seleniumhq.selenium:selenium-java:4.1.1'
     implementation 'org.jsoup:jsoup:1.17.1'

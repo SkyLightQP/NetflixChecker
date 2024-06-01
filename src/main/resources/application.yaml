@@ -3,9 +3,9 @@ spring:
     import:
       - config.yaml
   exposed:
-    generate-ddl: true
+    generate-ddl: false
   datasource:
-    url: jdbc:h2:./data/data
-    driver-class-name: org.h2.Driver
+    url: ${DATABASE_URL}
+    driver-class-name: org.postgresql.Driver
 sentry:
   dsn: ${SENTRY_DSN}
