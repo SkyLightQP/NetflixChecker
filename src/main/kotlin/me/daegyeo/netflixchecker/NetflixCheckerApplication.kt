@@ -68,7 +68,7 @@ class NetflixCheckerApplication(
     fun supabase(): SupabaseClient {
         val supabase = createSupabaseClient(
             supabaseUrl = supabaseConfiguration.url,
-            supabaseKey = supabaseConfiguration.key,
+            supabaseKey = supabaseConfiguration.key
         ) {
             defaultSerializer = JacksonSerializer()
             install(Auth)
