@@ -21,7 +21,7 @@ class AuthService(private val supabaseClient: SupabaseClient) {
 
             val session = supabaseClient.auth.currentSessionOrNull() ?: throw ServiceException("세션을 찾을 수 없습니다.", 404)
 
-            logger.info("${emailInput} 관리자가 로그인 하였습니다.")
+            logger.info("$emailInput 관리자가 로그인 하였습니다.")
 
             return session.user!!.email!!
         } catch (e: BadRequestRestException) {
@@ -33,6 +33,8 @@ class AuthService(private val supabaseClient: SupabaseClient) {
     }
 
     suspend fun logout() {
+        val targetEmail = supabaseClient.auth.currentSessionOrNull()?.user?.email ?: throw ServiceException("세션을 찾을 수 없습니다.", 404)
         supabaseClient.auth.signOut()
+        logger.info("$targetEmail 관리자가 로그아웃 하였습니다.")
     }
 }
