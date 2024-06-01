@@ -6,8 +6,8 @@ import discord4j.core.`object`.entity.channel.GuildMessageChannel
 import me.daegyeo.netflixchecker.config.DiscordConfiguration
 import me.daegyeo.netflixchecker.entity.DepositLog
 import me.daegyeo.netflixchecker.event.CompletedBankCrawlEvent
-import me.daegyeo.netflixchecker.table.DepositLogs
 import me.daegyeo.netflixchecker.shared.util.EmbedUtil
+import me.daegyeo.netflixchecker.table.DepositLogs
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
@@ -37,7 +37,7 @@ class BankAlert(
             var count = 0
             event.data.forEach {
                 val log = DepositLog.find {
-                    (DepositLogs.date eq it.date) and (DepositLogs.who eq it.who)
+                    (DepositLogs.date eq LocalDate.parse(it.date)) and (DepositLogs.who eq it.who)
                 }.firstOrNull()
 
                 if (log == null) {
@@ -51,7 +51,8 @@ class BankAlert(
                     DepositLog.new {
                         who = it.who
                         cost = it.cost.toInt()
-                        date = it.date
+                        date = LocalDate.parse(it.date)
+                        costMonth = it.costMonth.toInt()
                     }
 
                     count++
