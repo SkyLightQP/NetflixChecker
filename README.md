@@ -32,9 +32,9 @@ docker run --env-file=.env -v ./data:/workspace/data --name netflixchecker -d ne
 
 ## 데이터베이스 구축하기 
 
-H2 데이터베이스를 사용합니다.
+Supabase를 사용해서 데이터베이스 및 관리자 계정을 관리합니다.
 
-데이터베이스 테이블이 없다면 봇 시작 시 자동으로 생성합니다.
+Supabase API 정보가 필요합니다.
 
 ## 환경변수
 
@@ -64,6 +64,8 @@ POP3_PASSWORD=
 # Sentry
 SENTRY_DSN=
 
-# API JWT Secret
-JWT_SECRET=
+# Supabase API
+SUPABASE_URL=
+# NOT ANON Key, Use Service Role Key
+SUPABASE_SECRET_KEY=
 ```
