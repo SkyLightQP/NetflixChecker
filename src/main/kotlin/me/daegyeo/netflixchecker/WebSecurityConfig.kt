@@ -7,6 +7,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+
 
 @Configuration
 @EnableWebSecurity
@@ -14,7 +17,7 @@ class WebSecurityConfig {
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
-            .cors { }
+            .cors { it.configurationSource(corsConfigurationSource()) }
             .csrf { it.disable() }
             .formLogin { it.disable() }
             .httpBasic { it.disable() }
@@ -24,5 +27,16 @@ class WebSecurityConfig {
     @Bean
     fun passwordEncoder(): PasswordEncoder {
         return BCryptPasswordEncoder()
+    }
+
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        return CorsConfigurationSource { _ ->
+            val config = CorsConfiguration()
+            config.allowedHeaders = listOf("*")
+            config.allowedMethods = listOf("OPTIONS", "HEAD", "GET", "POST", "PUT", "PATCH", "DELETE")
+            config.allowCredentials = true
+            config.setAllowedOriginPatterns(listOf("http://localhost:3000"))
+            config
+        }
     }
 }
