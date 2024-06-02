@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.net.URL
 import java.time.Duration
+import kotlin.math.round
 
 enum class ButtonType {
     SHIFT, CHAR, NORMAL
@@ -166,28 +167,8 @@ class BankCrawler(
             val who = accountDetailHtml.selectXpath("span[12]").text()
 
             if (normalizeCost != 0) {
-                val bankCostX2 = bankConfiguration.cost * 2
-                val bankCostX3 = bankConfiguration.cost * 3
-
-                when {
-                    normalizeCost == bankConfiguration.cost -> result.add(
-                        AccountData(
-                            time, date, normalizeCost.toString(), who, "1"
-                        )
-                    )
-
-                    normalizeCost == bankCostX2 -> result.add(
-                        AccountData(
-                            time, date, normalizeCost.toString(), who, "2"
-                        )
-                    )
-
-                    normalizeCost == bankCostX3 -> result.add(
-                        AccountData(
-                            time, date, normalizeCost.toString(), who, "3"
-                        )
-                    )
-                }
+                val costMonth = round(normalizeCost / bankConfiguration.cost.toDouble()).toString()
+                result.add(AccountData(time, date, normalizeCost.toString(), who, costMonth))
             }
 
             driver.findElement(By.xpath("//*[@id=\"btn_목록보기\"]")).click()
