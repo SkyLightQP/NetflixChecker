@@ -175,7 +175,7 @@ class BankCrawler(
             val who = accountDetailHtml.selectXpath("span[12]").text()
 
             if (normalizeCost != 0) {
-                val costMonth = round(normalizeCost / bankConfiguration.cost.toDouble()).toString()
+                val costMonth = round(normalizeCost / bankConfiguration.cost.toDouble()).toInt().toString()
                 result.add(AccountData(time, date, normalizeCost.toString(), who, costMonth))
             }
 
@@ -216,9 +216,11 @@ class BankCrawler(
         } catch (e: Exception) {
             logger.error("은행 크롤링 중 오류가 발생했습니다. 브라우저를 닫습니다.", e)
             closeBrowser()
-            Metrics.upsert(Metrics.key, where = { Metrics.key eq MetricsKey.LATEST_CRAWLING_STATUS.name }) {
-                it[key] = MetricsKey.LATEST_CRAWLING_STATUS.name
-                it[value] = "X"
+            transaction {
+                Metrics.upsert(Metrics.key, where = { Metrics.key eq MetricsKey.LATEST_CRAWLING_STATUS.name }) {
+                    it[key] = MetricsKey.LATEST_CRAWLING_STATUS.name
+                    it[value] = "X"
+                }
             }
             return emptyList()
         }
