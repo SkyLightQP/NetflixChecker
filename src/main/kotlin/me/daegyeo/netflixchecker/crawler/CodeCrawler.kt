@@ -6,7 +6,6 @@ import me.daegyeo.netflixchecker.table.Metrics
 import org.jetbrains.exposed.sql.IntegerColumnType
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
 import org.jetbrains.exposed.sql.castTo
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.upsert
 import org.jsoup.Jsoup
 import org.slf4j.LoggerFactory
@@ -47,42 +46,41 @@ class CodeCrawler(private val pop3Configuration: Pop3Configuration) {
         inbox.open(Folder.READ_ONLY)
         val messages = inbox.messages
 
-        transaction {
-            for (i in messages.size - 1 downTo (messages.size - 10).coerceAtLeast(0)) {
-                val message = messages[i]
-                val content = message.content
-                if (message.subject != EMAIL_SUBJECT || message.from[0].toString() != EMAIL_FROM) {
-                    continue
-                }
-                if (!content.toString().contains("Multipart")) {
-                    continue
-                }
 
-                val convertedContent = convertMultipartToString(content as Multipart)
-                val html = Jsoup.parse(convertedContent).body()
-                val text =
-                    html.selectXpath("table/tbody/tr/td/table/tbody/tr[2]/td/table[5]/tbody/tr/td/table/tbody/tr/td/table[1]/tbody/tr[2]/td[3]/table/tbody/tr/td")
-                        .text()
-                val link =
-                    html.selectXpath("table/tbody/tr/td/table/tbody/tr[2]/td/table[5]/tbody/tr/td/table/tbody/tr/td/table[2]/tbody/tr/td/table/tbody/tr/td/a")
-                        .attr("href")
-
-                logger.info("넷플릭스 인증코드를 발견했습니다.")
-
-                inbox.close(false)
-                store.close()
-
-                Metrics.upsert(
-                    Metrics.key,
-                    onUpdate = listOf(Metrics.value to Metrics.value.castTo(IntegerColumnType()).plus(1)),
-                    where = { Metrics.key eq MetricsKey.CODE_GENERATED_COUNT.name }
-                ) {
-                    it[key] = MetricsKey.CODE_GENERATED_COUNT.name
-                    it[value] = "1"
-                }
-
-                return@transaction VerificationCode(text, link)
+        for (i in messages.size - 1 downTo (messages.size - 10).coerceAtLeast(0)) {
+            val message = messages[i]
+            val content = message.content
+            if (message.subject != EMAIL_SUBJECT || message.from[0].toString() != EMAIL_FROM) {
+                continue
             }
+            if (!content.toString().contains("Multipart")) {
+                continue
+            }
+
+            val convertedContent = convertMultipartToString(content as Multipart)
+            val html = Jsoup.parse(convertedContent).body()
+            val text =
+                html.selectXpath("table/tbody/tr/td/table/tbody/tr[2]/td/table[5]/tbody/tr/td/table/tbody/tr/td/table[1]/tbody/tr[2]/td[3]/table/tbody/tr/td")
+                    .text()
+            val link =
+                html.selectXpath("table/tbody/tr/td/table/tbody/tr[2]/td/table[5]/tbody/tr/td/table/tbody/tr/td/table[2]/tbody/tr/td/table/tbody/tr/td/a")
+                    .attr("href")
+
+            logger.info("넷플릭스 인증코드를 발견했습니다.")
+
+            inbox.close(false)
+            store.close()
+
+            Metrics.upsert(
+                Metrics.key,
+                onUpdate = listOf(Metrics.value to Metrics.value.castTo(IntegerColumnType()).plus(1)),
+                where = { Metrics.key eq MetricsKey.CODE_GENERATED_COUNT.name }
+            ) {
+                it[key] = MetricsKey.CODE_GENERATED_COUNT.name
+                it[value] = "1"
+            }
+
+            return VerificationCode(text, link)
         }
 
         inbox.close(false)
