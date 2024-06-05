@@ -3,6 +3,10 @@ package me.daegyeo.netflixchecker.crawler
 import me.daegyeo.netflixchecker.config.BankConfiguration
 import me.daegyeo.netflixchecker.config.SeleniumConfiguration
 import me.daegyeo.netflixchecker.data.AccountData
+import me.daegyeo.netflixchecker.enum.MetricsKey
+import me.daegyeo.netflixchecker.table.Metrics
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.upsert
 import org.jsoup.Jsoup
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
@@ -15,7 +19,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.net.URL
 import java.time.Duration
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlin.math.round
+
 
 enum class ButtonType {
     SHIFT, CHAR, NORMAL
@@ -185,15 +193,36 @@ class BankCrawler(
     }
 
     fun crawl(): List<AccountData> {
-        try {
-            driver.get(BANK_URL)
-            loginBank()
-            selectBankAccount()
-            return getAccountData()
-        } catch (e: Exception) {
-            logger.error("은행 크롤링 중 오류가 발생했습니다. 브라우저를 닫습니다.", e)
-            closeBrowser()
-            return emptyList()
+        val formatter = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss")
+            .withZone(ZoneId.of("Asia/Seoul"))
+
+        transaction {
+            try {
+                driver.get(BANK_URL)
+                loginBank()
+                selectBankAccount()
+                val result = getAccountData()
+                Metrics.upsert(Metrics.key, where = { Metrics.key eq MetricsKey.LATEST_CRAWLING_STATUS.name }) {
+                    it[key] = MetricsKey.LATEST_CRAWLING_STATUS.name
+                    it[value] = "O"
+                }
+                Metrics.upsert(Metrics.key, where = { Metrics.key eq MetricsKey.LATEST_CRAWLING_TIME.name }) {
+                    it[key] = MetricsKey.LATEST_CRAWLING_TIME.name
+                    it[value] = LocalDateTime.now().format(formatter)
+                }
+                return@transaction result
+            } catch (e: Exception) {
+                logger.error("은행 크롤링 중 오류가 발생했습니다. 브라우저를 닫습니다.", e)
+                closeBrowser()
+                Metrics.upsert(Metrics.key, where = { Metrics.key eq MetricsKey.LATEST_CRAWLING_STATUS.name }) {
+                    it[key] = MetricsKey.LATEST_CRAWLING_STATUS.name
+                    it[value] = "X"
+                }
+                return@transaction emptyList()
+            }
         }
+
+        return emptyList()
     }
 }
