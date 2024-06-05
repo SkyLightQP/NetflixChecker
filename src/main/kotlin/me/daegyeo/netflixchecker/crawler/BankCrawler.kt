@@ -1,5 +1,7 @@
 package me.daegyeo.netflixchecker.crawler
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import me.daegyeo.netflixchecker.config.BankConfiguration
 import me.daegyeo.netflixchecker.config.SeleniumConfiguration
 import me.daegyeo.netflixchecker.data.AccountData
@@ -36,8 +38,8 @@ class BankCrawler(
     private val DRIVER_NAME = "webdriver.chrome.driver"
     private val DRIVER_PATH = "chromedriver.exe"
     private val BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
-    private val WAIT_SECONDS: Long = 10
-    private val BUTTON_WAIT_SECONDS: Long = 5
+    private val WAIT_SECONDS: Long = 8
+    private val BUTTON_WAIT_SECONDS: Long = 2
 
     lateinit var driver: WebDriver
 
@@ -114,6 +116,9 @@ class BankCrawler(
             driver, Duration.ofSeconds(WAIT_SECONDS)
         ).until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"mtk_비밀번호\"]")))
         bankConfiguration.sitePassword.forEach {
+            runBlocking {
+                delay(BUTTON_WAIT_SECONDS * 1000)
+            }
             when {
                 it.isUpperCase() -> clickSecureButton(ButtonType.SHIFT, it.toString())
                 it == '*' -> clickSecureButton(ButtonType.CHAR, "별표")
@@ -145,6 +150,9 @@ class BankCrawler(
             driver, Duration.ofSeconds(WAIT_SECONDS)
         ).until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"mtk_계좌비밀번호\"]")))
         bankConfiguration.accountPassword.forEach {
+            runBlocking {
+                delay(BUTTON_WAIT_SECONDS * 1000)
+            }
             clickSecureButton(ButtonType.NORMAL, it.toString())
         }
 
