@@ -2,6 +2,7 @@ package me.daegyeo.netflixchecker.api.service
 
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.exceptions.BadRequestRestException
+import io.github.jan.supabase.exceptions.UnknownRestException
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.builtin.Email
 import me.daegyeo.netflixchecker.api.exception.ServiceException
@@ -33,8 +34,13 @@ class AuthService(private val supabaseClient: SupabaseClient) {
     }
 
     suspend fun logout() {
-        val targetEmail = supabaseClient.auth.currentSessionOrNull()?.user?.email ?: throw ServiceException("세션을 찾을 수 없습니다.", 404)
-        supabaseClient.auth.signOut()
-        logger.info("$targetEmail 관리자가 로그아웃 하였습니다.")
+        try {
+            val targetEmail = supabaseClient.auth.currentSessionOrNull()?.user?.email ?: throw ServiceException("세션을 찾을 수 없습니다.", 404)
+            supabaseClient.auth.clearSession()
+            supabaseClient.auth.signOut()
+            logger.info("$targetEmail 관리자가 로그아웃 하였습니다.")
+        } catch (e: UnknownRestException) {
+            return
+        }
     }
 }
