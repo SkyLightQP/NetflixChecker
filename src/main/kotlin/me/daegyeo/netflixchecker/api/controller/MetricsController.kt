@@ -30,8 +30,8 @@ class MetricsController(private val metricsService: MetricsService) {
 
     @CheckAuth
     @GetMapping("/crawling/status")
-    fun getIsSuccessLatestCrawling(): Map<String, Boolean> {
-        return mapOf("result" to metricsService.getIsSuccessLatestCrawling())
+    fun getIsSuccessLatestCrawling(): Map<String, String> {
+        return mapOf("result" to if (metricsService.getIsSuccessLatestCrawling()) "O" else "X")
     }
 
     @CheckAuth
