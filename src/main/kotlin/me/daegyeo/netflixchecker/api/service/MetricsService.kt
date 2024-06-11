@@ -31,8 +31,13 @@ class MetricsService {
     }
 
     fun getLatestDepositor(): String {
+        val now = Instant.now().atZone(ZoneId.of("Asia/Seoul"))
+        val month = now.monthValue
+
         val query = transaction {
-            DepositLog.all().orderBy(DepositLogs.date to SortOrder.DESC).limit(1).firstOrNull()
+            DepositLog.find {
+                DepositLogs.date.month() eq month
+            }.orderBy(DepositLogs.date to SortOrder.DESC).limit(1).firstOrNull()
         }
         val dec = DecimalFormat("#,###")
 
@@ -41,7 +46,7 @@ class MetricsService {
         return "${query.who} (${dec.format(query.cost)} 원)"
     }
 
-    fun getThisMonthCodeGeneratedCount(): Int {
+    fun getCodeGeneratedCount(): Int {
         val count = transaction {
             Metric.find { Metrics.key eq MetricsKey.CODE_GENERATED_COUNT.key }.firstOrNull()
         } ?: return 0
