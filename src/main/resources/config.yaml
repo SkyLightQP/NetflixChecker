@@ -4,9 +4,6 @@ discord:
   admin: ${DISCORD_ADMIN_ID}
 bank:
   cost: ${BANK_COST}
-  site-id: ${BANK_SITE_ID}
-  site-password: ${BANK_SITE_PASSWORD}
-  account-password: ${BANK_ACCOUNT_PASSWORD}
 selenium:
   use-remote: ${SELENIUM_USE_REMOTE}
   host: ${SELENIUM_REMOTE_HOST}
