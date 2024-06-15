@@ -14,7 +14,10 @@ import java.time.format.DateTimeFormatter
 
 @RestController
 @RequestMapping("/deposit")
-class DepositController(private val depositService: DepositService, private val corutineScope: CoroutineScope) {
+class DepositController(
+    private val depositService: DepositService,
+    private val coroutineScope: CoroutineScope
+) {
 
     @CheckAuth
     @GetMapping
@@ -25,7 +28,7 @@ class DepositController(private val depositService: DepositService, private val 
     @CheckAuth
     @PostMapping("/crawl")
     fun crawlBankManually(): ResponseEntity<Unit> {
-        corutineScope.launch {
+        coroutineScope.launch {
             depositService.crawlBankManually()
         }
         return ResponseEntity.ok().build()
