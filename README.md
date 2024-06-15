@@ -19,7 +19,7 @@
 
 - NetflixChecker는 인증 및 인가, 데이터베이스, 설정 관리를 위해 **Supabase**를 사용하고 있습니다.
 - 시작 전 Supabase 프로젝트를 생성해주세요.
-- 크롤링을 위해 `ChromeDriver` 또는 Remote Selenium 서버가 필요합니다.
+- 크롤링을 위해 **ChromeDriver** 또는 Remote Selenium 서버가 필요합니다.
 - 오류 수집을 위해 **Sentry**가 필요합니다.
 
 ```shell
@@ -65,7 +65,7 @@ SUPABASE_SECRET_KEY=
 
 ## 민감한 정보 관리하기
 
-- `입급 대상자 이름`, `은행 정보`, `계좌 정보`는 [Supabase Vault](https://supabase.com/docs/guides/database/vault)를 사용해서 관리합니다.
+- `입금 대상자 이름`, `은행 정보`, `계좌 정보`는 [Supabase Vault](https://supabase.com/docs/guides/database/vault)를 사용해서 관리합니다.
 - 아래 값을 Supabase Vault에 추가해주세요.
 
 | Name                     | Value                                      |
