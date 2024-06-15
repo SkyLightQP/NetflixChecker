@@ -1,5 +1,4 @@
-# NetflixChecker [![Made with Supabase](https://supabase.com/badge-made-with-supabase.svg)](https://supabase.com)
- ![works badge](https://cdn.jsdelivr.net/gh/nikku/works-on-my-machine@v0.2.0/badge.svg) ![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?logo=kotlin&logoColor=white) ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?logo=spring&logoColor=white)
+# NetflixChecker [![Made with Supabase](https://supabase.com/badge-made-with-supabase.svg)](https://supabase.com) ![works badge](https://cdn.jsdelivr.net/gh/nikku/works-on-my-machine@v0.2.0/badge.svg) ![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?logo=kotlin&logoColor=white) ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?logo=spring&logoColor=white)
 
 <br/>
 <p align="center">
