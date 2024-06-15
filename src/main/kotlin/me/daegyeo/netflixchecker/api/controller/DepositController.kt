@@ -43,7 +43,7 @@ class DepositController(
                 who = request.who,
                 cost = request.cost.toString(),
                 costMonth = request.costMonth.toString(),
-                date = now.toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                date = request.date,
                 time = now.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
             )
         )
