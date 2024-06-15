@@ -4,6 +4,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import me.daegyeo.netflixchecker.config.BankConfiguration
 import me.daegyeo.netflixchecker.config.SeleniumConfiguration
+import me.daegyeo.netflixchecker.config.VaultConfiguration
 import me.daegyeo.netflixchecker.data.AccountData
 import me.daegyeo.netflixchecker.enum.MetricsKey
 import me.daegyeo.netflixchecker.table.Metrics
@@ -33,7 +34,8 @@ enum class ButtonType {
 
 @Component
 class BankCrawler(
-    private val seleniumConfiguration: SeleniumConfiguration, private val bankConfiguration: BankConfiguration
+    private val seleniumConfiguration: SeleniumConfiguration,
+    private val bankConfiguration: BankConfiguration
 ) {
     private val DRIVER_NAME = "webdriver.chrome.driver"
     private val DRIVER_PATH = "chromedriver.exe"
@@ -109,13 +111,13 @@ class BankCrawler(
             ExpectedConditions.elementToBeClickable(By.id("btn_idLogin"))
         )
 
-        driver.findElement(By.xpath("//*[@id=\"ibx_loginId\"]")).sendKeys(bankConfiguration.siteId)
+        driver.findElement(By.xpath("//*[@id=\"ibx_loginId\"]")).sendKeys(VaultConfiguration.BANK_SITE_ID)
         driver.findElement(By.xpath("//*[@id=\"비밀번호\"]")).click()
 
         WebDriverWait(
             driver, Duration.ofSeconds(WAIT_SECONDS)
         ).until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"mtk_비밀번호\"]")))
-        bankConfiguration.sitePassword.forEach {
+        VaultConfiguration.BANK_SITE_PASSWORD.forEach {
             runBlocking {
                 delay(BUTTON_WAIT_SECONDS * 1000)
             }
@@ -149,7 +151,7 @@ class BankCrawler(
         WebDriverWait(
             driver, Duration.ofSeconds(WAIT_SECONDS)
         ).until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"mtk_계좌비밀번호\"]")))
-        bankConfiguration.accountPassword.forEach {
+        VaultConfiguration.BANK_ACCOUNT_PASSWORD.forEach {
             runBlocking {
                 delay(BUTTON_WAIT_SECONDS * 1000)
             }
@@ -181,8 +183,11 @@ class BankCrawler(
             val cost = accountDetailHtml.selectXpath("span[10]").text()
             val normalizeCost = cost.replace(",", "").toInt()
             val who = accountDetailHtml.selectXpath("span[12]").text()
+            val targetNames = VaultConfiguration.DEPOSIT_TARGET_NAMES
+                .replace("[", "").replace("]", "").replace("\"", "")
+                .split(", ")
 
-            if (normalizeCost != 0) {
+            if (who in targetNames && normalizeCost != 0) {
                 val costMonth = round(normalizeCost / bankConfiguration.cost.toDouble()).toInt().toString()
                 result.add(AccountData(time, date, normalizeCost.toString(), who, costMonth))
             }
