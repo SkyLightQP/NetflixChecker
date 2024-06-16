@@ -5,6 +5,8 @@ import me.daegyeo.netflixchecker.crawler.BankCrawler
 import me.daegyeo.netflixchecker.data.AccountData
 import me.daegyeo.netflixchecker.entity.DepositLog
 import me.daegyeo.netflixchecker.event.CompletedBankCrawlEvent
+import me.daegyeo.netflixchecker.table.DepositLogs
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
@@ -25,7 +27,7 @@ class DepositService(
 
     fun getDepositors(): List<DepositLogDTO> {
         val data = transaction {
-            DepositLog.all().map {
+            DepositLog.all().orderBy(DepositLogs.date to SortOrder.DESC).map {
                 DepositLogDTO(it.id.value, it.who, it.cost, it.date, it.costMonth)
             }
         }
