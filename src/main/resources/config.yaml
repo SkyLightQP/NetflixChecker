@@ -16,3 +16,5 @@ pop3:
 supabase:
   url: ${SUPABASE_URL}
   key: ${SUPABASE_SECRET_KEY}
+cors:
+  origin: ${CORS_PRODUCTION_ORIGIN}

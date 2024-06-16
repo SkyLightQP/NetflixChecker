@@ -39,3 +39,8 @@ data class SupabaseConfiguration(
     val url: String = "",
     val key: String = ""
 )
+
+@ConfigurationProperties(prefix = "cors")
+data class CorsOriginConfiguration(
+    val origin: String = ""
+)

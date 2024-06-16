@@ -61,6 +61,9 @@ SENTRY_DSN=
 SUPABASE_URL=
 # NOT ANON Key, Use Service Role Key
 SUPABASE_SECRET_KEY=
+
+# CORS
+CORS_PRODUCTION_ORIGIN=
 ```
 
 ## 민감한 정보 관리하기
