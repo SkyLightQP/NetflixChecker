@@ -1,6 +1,13 @@
 package me.daegyeo.netflixchecker.crawler
 
 import me.daegyeo.netflixchecker.config.Pop3Configuration
+import me.daegyeo.netflixchecker.enum.MetricsKey
+import me.daegyeo.netflixchecker.table.Metrics
+import org.jetbrains.exposed.sql.IntegerColumnType
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
+import org.jetbrains.exposed.sql.castTo
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.upsert
 import org.jsoup.Jsoup
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -40,6 +47,7 @@ class CodeCrawler(private val pop3Configuration: Pop3Configuration) {
         inbox.open(Folder.READ_ONLY)
         val messages = inbox.messages
 
+
         for (i in messages.size - 1 downTo (messages.size - 10).coerceAtLeast(0)) {
             val message = messages[i]
             val content = message.content
@@ -63,6 +71,17 @@ class CodeCrawler(private val pop3Configuration: Pop3Configuration) {
 
             inbox.close(false)
             store.close()
+
+            transaction {
+                Metrics.upsert(
+                    Metrics.key,
+                    onUpdate = listOf(Metrics.value to Metrics.value.castTo(IntegerColumnType()).plus(1)),
+                    where = { Metrics.key eq MetricsKey.CODE_GENERATED_COUNT.name }
+                ) {
+                    it[key] = MetricsKey.CODE_GENERATED_COUNT.name
+                    it[value] = "1"
+                }
+            }
 
             return VerificationCode(text, link)
         }

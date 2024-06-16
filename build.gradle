@@ -26,16 +26,37 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.discord4j:discord4j-core:3.2.5'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+
+    implementation 'org.jetbrains.exposed:exposed-spring-boot-starter:0.51.0'
+    implementation 'org.jetbrains.exposed:exposed-java-time:0.51.0'
+    implementation 'org.postgresql:postgresql:42.7.1'
+
+    implementation 'com.discord4j:discord4j-core:3.2.5'
+
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
-    implementation 'org.jetbrains.exposed:exposed-spring-boot-starter:0.48.0'
-    implementation 'com.h2database:h2:2.2.224'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-reactor'
+    implementation 'io.projectreactor.kotlin:reactor-kotlin-extensions'
+
     implementation 'org.seleniumhq.selenium:selenium-java:4.1.1'
     implementation 'org.jsoup:jsoup:1.17.1'
-    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+
+    implementation platform("io.github.jan-tennert.supabase:bom:2.0.0")
+    implementation 'io.github.jan-tennert.supabase:gotrue-kt'
+    implementation 'io.github.jan-tennert.supabase:postgrest-kt'
+    implementation 'io.github.jan-tennert.supabase:serializer-jackson'
+
     implementation 'com.sun.mail:javax.mail:1.6.2'
+    implementation 'io.ktor:ktor-client-apache:2.3.11'
     implementation 'io.sentry:sentry-spring-boot-starter-jakarta:7.6.0'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

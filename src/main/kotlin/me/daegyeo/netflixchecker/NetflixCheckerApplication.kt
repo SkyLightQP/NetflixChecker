@@ -4,7 +4,16 @@ import discord4j.core.DiscordClientBuilder
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.event.domain.Event
 import discord4j.rest.RestClient
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.gotrue.Auth
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.serializer.JacksonSerializer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import me.daegyeo.netflixchecker.config.DiscordConfiguration
+import me.daegyeo.netflixchecker.config.SupabaseConfiguration
 import me.daegyeo.netflixchecker.listener.EventListener
 import org.jetbrains.exposed.spring.autoconfigure.ExposedAutoConfiguration
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration
@@ -27,7 +36,11 @@ fun main(args: Array<String>) {
     exclude = [DataSourceTransactionManagerAutoConfiguration::class]
 )
 @EnableScheduling
-class NetflixCheckerApplication(private val discordConfiguration: DiscordConfiguration) {
+class NetflixCheckerApplication(
+    private val discordConfiguration: DiscordConfiguration,
+    private val supabaseConfiguration: SupabaseConfiguration
+) {
+    private val applicationCoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     @Bean
     fun <T : Event> gatewayDiscordClient(eventListeners: List<EventListener<T>>): GatewayDiscordClient {
@@ -50,4 +63,21 @@ class NetflixCheckerApplication(private val discordConfiguration: DiscordConfigu
     fun discordRestClient(client: GatewayDiscordClient): RestClient {
         return client.restClient
     }
+
+    @Bean
+    fun supabase(): SupabaseClient {
+        val supabase = createSupabaseClient(
+            supabaseUrl = supabaseConfiguration.url,
+            supabaseKey = supabaseConfiguration.key
+        ) {
+            defaultSerializer = JacksonSerializer()
+            install(Auth)
+            install(Postgrest)
+        }
+
+        return supabase
+    }
+
+    @Bean
+    fun coroutineScope(): CoroutineScope = applicationCoroutineScope
 }

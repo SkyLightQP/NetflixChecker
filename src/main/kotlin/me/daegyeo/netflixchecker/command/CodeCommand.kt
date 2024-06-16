@@ -2,7 +2,7 @@ package me.daegyeo.netflixchecker.command
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import me.daegyeo.netflixchecker.crawler.CodeCrawler
-import me.daegyeo.netflixchecker.util.EmbedUtil
+import me.daegyeo.netflixchecker.shared.util.EmbedUtil
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 

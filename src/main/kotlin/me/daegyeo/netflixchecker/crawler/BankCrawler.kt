@@ -1,8 +1,15 @@
 package me.daegyeo.netflixchecker.crawler
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import me.daegyeo.netflixchecker.config.BankConfiguration
 import me.daegyeo.netflixchecker.config.SeleniumConfiguration
+import me.daegyeo.netflixchecker.config.VaultConfiguration
 import me.daegyeo.netflixchecker.data.AccountData
+import me.daegyeo.netflixchecker.enum.MetricsKey
+import me.daegyeo.netflixchecker.table.Metrics
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.upsert
 import org.jsoup.Jsoup
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
@@ -15,6 +22,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.net.URL
 import java.time.Duration
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import kotlin.math.round
+
 
 enum class ButtonType {
     SHIFT, CHAR, NORMAL
@@ -22,13 +34,14 @@ enum class ButtonType {
 
 @Component
 class BankCrawler(
-    private val seleniumConfiguration: SeleniumConfiguration, private val bankConfiguration: BankConfiguration
+    private val seleniumConfiguration: SeleniumConfiguration,
+    private val bankConfiguration: BankConfiguration
 ) {
     private val DRIVER_NAME = "webdriver.chrome.driver"
     private val DRIVER_PATH = "chromedriver.exe"
     private val BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
-    private val WAIT_SECONDS: Long = 10
-    private val BUTTON_WAIT_SECONDS: Long = 5
+    private val WAIT_SECONDS: Long = 8
+    private val BUTTON_WAIT_SECONDS: Long = 2
 
     lateinit var driver: WebDriver
 
@@ -98,13 +111,16 @@ class BankCrawler(
             ExpectedConditions.elementToBeClickable(By.id("btn_idLogin"))
         )
 
-        driver.findElement(By.xpath("//*[@id=\"ibx_loginId\"]")).sendKeys(bankConfiguration.siteId)
+        driver.findElement(By.xpath("//*[@id=\"ibx_loginId\"]")).sendKeys(VaultConfiguration.BANK_SITE_ID)
         driver.findElement(By.xpath("//*[@id=\"비밀번호\"]")).click()
 
         WebDriverWait(
             driver, Duration.ofSeconds(WAIT_SECONDS)
         ).until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"mtk_비밀번호\"]")))
-        bankConfiguration.sitePassword.forEach {
+        VaultConfiguration.BANK_SITE_PASSWORD.forEach {
+            runBlocking {
+                delay(BUTTON_WAIT_SECONDS * 1000)
+            }
             when {
                 it.isUpperCase() -> clickSecureButton(ButtonType.SHIFT, it.toString())
                 it == '*' -> clickSecureButton(ButtonType.CHAR, "별표")
@@ -135,7 +151,10 @@ class BankCrawler(
         WebDriverWait(
             driver, Duration.ofSeconds(WAIT_SECONDS)
         ).until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"mtk_계좌비밀번호\"]")))
-        bankConfiguration.accountPassword.forEach {
+        VaultConfiguration.BANK_ACCOUNT_PASSWORD.forEach {
+            runBlocking {
+                delay(BUTTON_WAIT_SECONDS * 1000)
+            }
             clickSecureButton(ButtonType.NORMAL, it.toString())
         }
 
@@ -164,30 +183,13 @@ class BankCrawler(
             val cost = accountDetailHtml.selectXpath("span[10]").text()
             val normalizeCost = cost.replace(",", "").toInt()
             val who = accountDetailHtml.selectXpath("span[12]").text()
+            val targetNames = VaultConfiguration.DEPOSIT_TARGET_NAMES
+                .replace("[", "").replace("]", "").replace("\"", "")
+                .split(", ")
 
-            if (normalizeCost != 0) {
-                val bankCostX2 = bankConfiguration.cost * 2
-                val bankCostX3 = bankConfiguration.cost * 3
-
-                when {
-                    normalizeCost == bankConfiguration.cost -> result.add(
-                        AccountData(
-                            time, date, normalizeCost.toString(), who, "1"
-                        )
-                    )
-
-                    normalizeCost == bankCostX2 -> result.add(
-                        AccountData(
-                            time, date, normalizeCost.toString(), who, "2"
-                        )
-                    )
-
-                    normalizeCost == bankCostX3 -> result.add(
-                        AccountData(
-                            time, date, normalizeCost.toString(), who, "3"
-                        )
-                    )
-                }
+            if (who in targetNames && normalizeCost != 0) {
+                val costMonth = round(normalizeCost / bankConfiguration.cost.toDouble()).toInt().toString()
+                result.add(AccountData(time, date, normalizeCost.toString(), who, costMonth))
             }
 
             driver.findElement(By.xpath("//*[@id=\"btn_목록보기\"]")).click()
@@ -204,14 +206,35 @@ class BankCrawler(
     }
 
     fun crawl(): List<AccountData> {
+        val formatter = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss")
+            .withZone(ZoneId.of("Asia/Seoul"))
+
         try {
             driver.get(BANK_URL)
             loginBank()
             selectBankAccount()
-            return getAccountData()
+            val result = getAccountData()
+            transaction {
+                Metrics.upsert(Metrics.key, where = { Metrics.key eq MetricsKey.LATEST_CRAWLING_STATUS.name }) {
+                    it[key] = MetricsKey.LATEST_CRAWLING_STATUS.name
+                    it[value] = "O"
+                }
+                Metrics.upsert(Metrics.key, where = { Metrics.key eq MetricsKey.LATEST_CRAWLING_TIME.name }) {
+                    it[key] = MetricsKey.LATEST_CRAWLING_TIME.name
+                    it[value] = LocalDateTime.now().format(formatter)
+                }
+            }
+            return result
         } catch (e: Exception) {
             logger.error("은행 크롤링 중 오류가 발생했습니다. 브라우저를 닫습니다.", e)
             closeBrowser()
+            transaction {
+                Metrics.upsert(Metrics.key, where = { Metrics.key eq MetricsKey.LATEST_CRAWLING_STATUS.name }) {
+                    it[key] = MetricsKey.LATEST_CRAWLING_STATUS.name
+                    it[value] = "X"
+                }
+            }
             return emptyList()
         }
     }

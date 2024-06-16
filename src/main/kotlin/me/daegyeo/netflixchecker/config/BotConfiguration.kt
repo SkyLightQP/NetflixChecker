@@ -11,10 +11,7 @@ data class DiscordConfiguration(
 
 @ConfigurationProperties(prefix = "bank")
 data class BankConfiguration(
-    val cost: Int = 0,
-    val siteId: String = "",
-    val sitePassword: String = "",
-    val accountPassword: String = ""
+    val cost: Int = 0
 )
 
 @ConfigurationProperties(prefix = "selenium")
@@ -35,4 +32,10 @@ data class Pop3Configuration(
 @ConfigurationProperties(prefix = "sentry")
 data class SentryConfiguration(
     val dsn: String = "",
+)
+
+@ConfigurationProperties(prefix = "supabase")
+data class SupabaseConfiguration(
+    val url: String = "",
+    val key: String = ""
 )

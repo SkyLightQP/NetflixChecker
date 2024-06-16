@@ -1,4 +1,4 @@
-# NetflixChecker ![works badge](https://cdn.jsdelivr.net/gh/nikku/works-on-my-machine@v0.2.0/badge.svg) ![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?logo=kotlin&logoColor=white) ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?logo=spring&logoColor=white)
+# NetflixChecker [![Made with Supabase](https://supabase.com/badge-made-with-supabase.svg)](https://supabase.com) ![works badge](https://cdn.jsdelivr.net/gh/nikku/works-on-my-machine@v0.2.0/badge.svg) ![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?logo=kotlin&logoColor=white) ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?logo=spring&logoColor=white)
 
 <br/>
 <p align="center">
@@ -13,12 +13,14 @@
 ## 시작하기 전에
 
 - 신한은행에서만 작동합니다.
-- 작동여부를 보장하지 않습니다. 은행 상태에 따라 크롤링에 실패할 수 있습니다.
-- **은행 계좌번호 등 민감한 정보를 평문으로 저장하고 있습니다.**
+- 보안키보드 문제로 인해 100% 작동을 보장하지 않습니다.
 
 ## 시작하기
 
-- `ChromeDriver`가 필요합니다.
+- NetflixChecker는 인증 및 인가, 데이터베이스, 설정 관리를 위해 **Supabase**를 사용하고 있습니다.
+- 시작 전 Supabase 프로젝트를 생성해주세요.
+- 크롤링을 위해 **ChromeDriver** 또는 Remote Selenium 서버가 필요합니다.
+- 오류 수집을 위해 **Sentry**가 필요합니다.
 
 ```shell
 cp .env.example .env
@@ -30,12 +32,6 @@ docker build -t netflixchecker .
 docker run --env-file=.env -v ./data:/workspace/data --name netflixchecker -d netflixchecker 
 ```
 
-## 데이터베이스 구축하기 
-
-H2 데이터베이스를 사용합니다.
-
-데이터베이스 테이블이 없다면 봇 시작 시 자동으로 생성합니다.
-
 ## 환경변수
 
 ```dotenv
@@ -46,9 +42,6 @@ DISCORD_ADMIN_ID=
 
 # 은행 계정 및 계좌 정보
 BANK_COST=
-BANK_SITE_ID=
-BANK_SITE_PASSWORD=
-BANK_ACCOUNT_PASSWORD=
 
 # Selenium 정보
 SELENIUM_USE_REMOTE=false
@@ -63,4 +56,21 @@ POP3_PASSWORD=
 
 # Sentry
 SENTRY_DSN=
+
+# Supabase API
+SUPABASE_URL=
+# NOT ANON Key, Use Service Role Key
+SUPABASE_SECRET_KEY=
 ```
+
+## 민감한 정보 관리하기
+
+- `입금 대상자 이름`, `은행 정보`, `계좌 정보`는 [Supabase Vault](https://supabase.com/docs/guides/database/vault)를 사용해서 관리합니다.
+- 아래 값을 Supabase Vault에 추가해주세요.
+
+| Name                     | Value                                      |
+|-------------------------|--------------------------------------------|
+| `deposit_target_names`  | 입금 대상자 이름 (JSON-like, ex: ["홍길동", "김길동"])  |
+| `bank_site_id`          | 은행 홈페이지 아이디                                |
+| `bank_site_password`    | 은행 홈페이지 비밀번호                               |
+| `bank_account_password` | 은행 계좌 비밀번호                                 |
