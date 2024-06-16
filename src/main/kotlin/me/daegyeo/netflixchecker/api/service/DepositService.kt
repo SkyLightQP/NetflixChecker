@@ -8,6 +8,7 @@ import me.daegyeo.netflixchecker.event.CompletedBankCrawlEvent
 import me.daegyeo.netflixchecker.table.DepositLogs
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 
@@ -17,12 +18,16 @@ class DepositService(
     private val applicationEventPublisher: ApplicationEventPublisher
 ) {
 
+    private val logger = LoggerFactory.getLogger(DepositService::class.java)
+
     fun crawlBankManually() {
         bankCrawler.openBrowser()
         val result = bankCrawler.crawl()
         bankCrawler.closeBrowser()
 
         applicationEventPublisher.publishEvent(CompletedBankCrawlEvent(result))
+
+        logger.info("API를 통해 크롤링을 시작합니다.")
     }
 
     fun getDepositors(): List<DepositLogDTO> {
@@ -36,5 +41,6 @@ class DepositService(
 
     fun addDepositor(data: AccountData) {
         applicationEventPublisher.publishEvent(CompletedBankCrawlEvent(listOf(data)))
+        logger.info("새로운 입금 내역을 수동으로 추가했습니다.")
     }
 }
