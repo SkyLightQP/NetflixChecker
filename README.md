@@ -1,4 +1,4 @@
-# NetflixChecker [![Made with Supabase](https://supabase.com/badge-made-with-supabase.svg)](https://supabase.com) ![works badge](https://cdn.jsdelivr.net/gh/nikku/works-on-my-machine@v0.2.0/badge.svg) ![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?logo=kotlin&logoColor=white) ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?logo=spring&logoColor=white)
+# NetflixChecker [![Made with Supabase](https://supabase.com/badge-made-with-supabase.svg)](https://supabase.com) ![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white) ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white)
 
 <br/>
 <p align="center">
@@ -12,8 +12,8 @@
 
 ## 시작하기 전에
 
-- 신한은행에서만 작동합니다.
-- 보안키보드 문제로 인해 100% 작동을 보장하지 않습니다.
+- 신한은행 외 은행을 지원하지 않습니다.
+- 모든 환경에서의 정상 작동을 보장하지 않습니다.
 
 ## 시작하기
 
@@ -40,7 +40,7 @@ DISCORD_BOT_TOKEN=
 DISCORD_CHANNEL_ID=
 DISCORD_ADMIN_ID=
 
-# 은행 계정 및 계좌 정보
+# 확인할 입금 가격
 BANK_COST=
 
 # Selenium 정보
