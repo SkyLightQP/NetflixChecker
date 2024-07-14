@@ -21,13 +21,13 @@ class DepositService(
     private val logger = LoggerFactory.getLogger(DepositService::class.java)
 
     fun crawlBankManually() {
+        logger.info("API를 통해 크롤링을 시작합니다.")
+
         bankCrawler.openBrowser()
         val result = bankCrawler.crawl()
         bankCrawler.closeBrowser()
 
         applicationEventPublisher.publishEvent(CompletedBankCrawlEvent(result))
-
-        logger.info("API를 통해 크롤링을 시작합니다.")
     }
 
     fun getDepositors(): List<DepositLogDTO> {
