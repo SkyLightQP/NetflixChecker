@@ -41,7 +41,7 @@ class BankCrawler(
     private val DRIVER_PATH = "chromedriver.exe"
     private val BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
     private val WAIT_SECONDS: Long = 8
-    private val BUTTON_WAIT_SECONDS: Long = 2
+    private val BUTTON_WAIT_SECONDS: Long = 1
 
     lateinit var driver: WebDriver
 
@@ -74,34 +74,33 @@ class BankCrawler(
         WebDriverWait(driver, Duration.ofSeconds(seconds)).until(ExpectedConditions.elementToBeClickable(locator))
 
     private fun clickSecureButton(buttonType: ButtonType, value: String) {
-        val keyXPath = By.xpath("//img[@alt='$value']")
-        val uppercaseKeyXPath = By.xpath("//img[@alt='대문자$value']")
-        val specialKeyXPath = By.xpath("//img[@alt='특수키']")
-        val shiftKeyXPath = By.xpath("//img[@alt='쉬프트']")
-        val prevXPath = By.xpath("./../..")
+        val keyXPath = By.xpath("//a[@aria-label='$value']")
+        val uppercaseKeyXPath = By.xpath("//a[@aria-label='대문자${value.uppercase()}']")
+        val specialKeyXPath = By.xpath("//a[@aria-label='특수키']")
+        val shiftKeyXPath = By.xpath("//a[@aria-label='쉬프트']")
 
         when (buttonType) {
             ButtonType.SHIFT -> {
                 delayUntilClickable(BUTTON_WAIT_SECONDS, shiftKeyXPath)
-                driver.findElement(shiftKeyXPath).findElement(prevXPath).click()
+                driver.findElement(shiftKeyXPath).click()
                 delayUntilClickable(BUTTON_WAIT_SECONDS, uppercaseKeyXPath)
-                driver.findElement(uppercaseKeyXPath).findElement(prevXPath).click()
+                driver.findElement(uppercaseKeyXPath).click()
                 delayUntilClickable(BUTTON_WAIT_SECONDS, shiftKeyXPath)
-                driver.findElement(shiftKeyXPath).findElement(prevXPath).click()
+                driver.findElement(shiftKeyXPath).click()
             }
 
             ButtonType.CHAR -> {
                 delayUntilClickable(BUTTON_WAIT_SECONDS, specialKeyXPath)
-                driver.findElement(specialKeyXPath).findElement(prevXPath).click()
+                driver.findElement(specialKeyXPath).click()
                 delayUntilClickable(BUTTON_WAIT_SECONDS, keyXPath)
-                driver.findElement(keyXPath).findElement(prevXPath).click()
+                driver.findElement(keyXPath).click()
                 delayUntilClickable(BUTTON_WAIT_SECONDS, specialKeyXPath)
-                driver.findElement(specialKeyXPath).findElement(prevXPath).click()
+                driver.findElement(specialKeyXPath).click()
             }
 
             ButtonType.NORMAL -> {
                 delayUntilClickable(BUTTON_WAIT_SECONDS, keyXPath)
-                driver.findElement(keyXPath).findElement(prevXPath).click()
+                driver.findElement(keyXPath).click()
             }
         }
     }
@@ -117,6 +116,7 @@ class BankCrawler(
         WebDriverWait(
             driver, Duration.ofSeconds(WAIT_SECONDS)
         ).until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"mtk_비밀번호\"]")))
+        driver.findElement(By.xpath("//a[@aria-label='재배열']")).click()
         VaultConfiguration.BANK_SITE_PASSWORD.forEach {
             runBlocking {
                 delay(BUTTON_WAIT_SECONDS * 1000)
@@ -133,7 +133,7 @@ class BankCrawler(
             }
         }
 
-        driver.findElement(By.xpath("//*[@id=\"mtk_done\"]")).click()
+        driver.findElement(By.xpath("/html/body/div[5]/div[6]/a[3]")).click() // 보안키보드 입력 완료
         driver.findElement(By.id("btn_idLogin")).click()
 
         delayUntilClickable(BUTTON_WAIT_SECONDS, By.xpath("//*[@id=\"btn_alertLayer_yes\"]"))
@@ -146,6 +146,8 @@ class BankCrawler(
     private fun selectBankAccount() {
         driver.findElement(By.xpath("//*[@class=\"w2textbox mt5\"]")).click()
         driver.findElement(By.xpath("//*[@id=\"sbx_accno_input_0\"]/option[2]")).click()
+
+        runBlocking { delay(BUTTON_WAIT_SECONDS * 1000) }
         driver.findElement(By.xpath("//*[@id=\"계좌비밀번호\"]")).click()
 
         WebDriverWait(
