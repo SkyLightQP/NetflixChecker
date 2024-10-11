@@ -34,7 +34,7 @@ dependencies {
 
     implementation 'org.jetbrains.exposed:exposed-spring-boot-starter:0.51.0'
     implementation 'org.jetbrains.exposed:exposed-java-time:0.51.0'
-    implementation 'org.postgresql:postgresql:42.7.1'
+    implementation 'org.postgresql:postgresql:42.7.2'
 
     implementation 'com.discord4j:discord4j-core:3.2.5'
 
@@ -47,6 +47,7 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.17.1'
 
     implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    implementation 'io.ktor:ktor-client-cio-jvm:2.3.11'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
