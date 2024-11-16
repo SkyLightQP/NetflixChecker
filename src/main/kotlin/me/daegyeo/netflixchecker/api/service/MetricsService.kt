@@ -71,12 +71,12 @@ class MetricsService {
     }
 
     fun getLogs(): List<String> {
-        val file = File("data/logs").listFiles { file ->
+        val file = File("./data/logs").listFiles { file ->
             file.isFile && file.name.matches(Regex("log-\\d{4}-\\d{2}-\\d{2}.\\d+\\.log"))
         }?.maxByOrNull { it.lastModified() }
         val filePath = file?.toPath() ?: throw ServiceException("로그 파일이 존재하지 않습니다.", 404)
         val rawLog = Files.readString(filePath)
-        val log = rawLog.split("\r\n").takeLast(80)
+        val log = rawLog.split("\n").takeLast(80)
         val filteredLog = log.filter { !it.contains("Using generated security password") }
         
         return filteredLog
