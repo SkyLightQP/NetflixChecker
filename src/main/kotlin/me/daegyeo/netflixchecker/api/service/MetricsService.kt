@@ -1,5 +1,6 @@
 package me.daegyeo.netflixchecker.api.service
 
+import me.daegyeo.netflixchecker.api.exception.ServiceException
 import me.daegyeo.netflixchecker.entity.DepositLog
 import me.daegyeo.netflixchecker.entity.Metric
 import me.daegyeo.netflixchecker.enum.MetricsKey
@@ -9,6 +10,8 @@ import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.javatime.month
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Service
+import java.io.File
+import java.nio.file.Files
 import java.text.DecimalFormat
 import java.time.Instant
 import java.time.ZoneId
@@ -65,5 +68,16 @@ class MetricsService {
             Metric.find { Metrics.key eq MetricsKey.LATEST_CRAWLING_TIME.key }.firstOrNull()
         } ?: return "정보 없음"
         return data.value
+    }
+
+    fun getLogs(): List<String> {
+        val file = File("data/logs").listFiles { file ->
+            file.isFile && file.name.matches(Regex("log-\\d{4}-\\d{2}-\\d{2}.\\d+\\.log"))
+        }?.maxByOrNull { it.lastModified() }
+        val filePath = file?.toPath() ?: throw ServiceException("로그 파일이 존재하지 않습니다.", 404)
+        val rawLog = Files.readString(filePath)
+        val log = rawLog.split("\r\n").takeLast(80)
+
+        return log
     }
 }

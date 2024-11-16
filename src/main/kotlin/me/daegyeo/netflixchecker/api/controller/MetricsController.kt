@@ -39,4 +39,10 @@ class MetricsController(private val metricsService: MetricsService) {
     fun getLatestCrawlingTime(): Map<String, String> {
         return mapOf("result" to metricsService.getLatestCrawlingTime())
     }
+
+    @CheckAuth
+    @GetMapping("/logs")
+    fun getLogs(): Map<String, List<String>> {
+        return mapOf("result" to metricsService.getLogs())
+    }
 }
