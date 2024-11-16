@@ -77,7 +77,8 @@ class MetricsService {
         val filePath = file?.toPath() ?: throw ServiceException("로그 파일이 존재하지 않습니다.", 404)
         val rawLog = Files.readString(filePath)
         val log = rawLog.split("\r\n").takeLast(80)
-
-        return log
+        val filteredLog = log.filter { !it.contains("Using generated security password") }
+        
+        return filteredLog
     }
 }
