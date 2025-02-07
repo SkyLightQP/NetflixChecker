@@ -7,5 +7,7 @@ spring:
   datasource:
     url: ${DATABASE_URL}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
 sentry:
   dsn: ${SENTRY_DSN}
