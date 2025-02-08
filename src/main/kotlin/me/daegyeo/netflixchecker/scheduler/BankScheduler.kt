@@ -1,6 +1,5 @@
 package me.daegyeo.netflixchecker.scheduler
 
-import io.sentry.spring.jakarta.checkin.SentryCheckIn
 import me.daegyeo.netflixchecker.crawler.BankCrawler
 import me.daegyeo.netflixchecker.event.CompletedBankCrawlEvent
 import org.slf4j.LoggerFactory
@@ -19,7 +18,6 @@ class BankScheduler(
     private val BANK_MAINTENANCE_END_HOUR = LocalDateTime.now().withHour(1).withMinute(0).withSecond(0)
 
     @Scheduled(cron = "0 0 */6 * * *")
-    @SentryCheckIn("bank-crawl-scheduler")
     fun schedule() {
         val now = LocalDateTime.now()
         if (now.isAfter(BANK_MAINTENANCE_START) && now.isBefore(BANK_MAINTENANCE_END_HOUR)) {
