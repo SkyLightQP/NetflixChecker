@@ -8,7 +8,8 @@ spring:
     url: ${DATABASE_URL}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 10
+      maximum-pool-size: 5
       minimum-idle: 5
+      max-lifetime: 90000
 sentry:
   dsn: ${SENTRY_DSN}
