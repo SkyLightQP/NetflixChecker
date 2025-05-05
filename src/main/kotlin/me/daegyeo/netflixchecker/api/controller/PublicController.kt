@@ -22,7 +22,7 @@ class PublicController(
     @GetMapping("/code")
     fun getCode(@RequestHeader("Authorization") authorization: String): VerificationCode {
         try {
-            val token = authorization.substringAfter("Bearer ", "")
+            val token = authorization.substringAfter("Bearer ", "").trim()
 
             if (token.isEmpty()) {
                 throw ServiceException("권한이 없습니다.", 401)
