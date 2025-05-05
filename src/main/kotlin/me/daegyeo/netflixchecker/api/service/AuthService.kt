@@ -54,7 +54,11 @@ class AuthService(
     fun checkPublicApiPassword(inputPassword: String): Boolean {
         try {
             logger.info("인증코드용 공개 API 접근 비밀번호를 검증했습니다.")
-            return passwordEncoder.matches(inputPassword, publicApiConfiguration.password)
+            val result = passwordEncoder.matches(inputPassword, publicApiConfiguration.password)
+            if (!result) {
+                logger.warn("인증코드용 공개 API 접근 비밀번호가 일치하지 않습니다.")
+            }
+            return result
         } catch (e: Exception) {
             logger.error("인증코드용 공개 API 접근 비밀번호 검증 중 오류가 발생했습니다.", e)
         }
