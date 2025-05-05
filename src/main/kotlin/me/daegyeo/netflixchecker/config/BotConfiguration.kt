@@ -44,3 +44,9 @@ data class SupabaseConfiguration(
 data class CorsOriginConfiguration(
     val origin: String = ""
 )
+
+@ConfigurationProperties(prefix = "public-api")
+data class PublicApiConfiguration(
+    val password: String = "",
+    val secret: String = ""
+)

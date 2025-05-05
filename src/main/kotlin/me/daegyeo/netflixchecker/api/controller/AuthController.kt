@@ -1,6 +1,7 @@
 package me.daegyeo.netflixchecker.api.controller
 
 import me.daegyeo.netflixchecker.api.controller.request.AuthLoginRequest
+import me.daegyeo.netflixchecker.api.controller.request.PublicLoginRequest
 import me.daegyeo.netflixchecker.api.service.AuthService
 import me.daegyeo.netflixchecker.shared.annotation.CheckAuth
 import org.springframework.web.bind.annotation.*
@@ -19,5 +20,10 @@ class AuthController(private val authService: AuthService) {
     @DeleteMapping("/logout")
     suspend fun logout() {
         authService.logout()
+    }
+
+    @PostMapping("/public/login")
+    fun publicLogin(@RequestBody request: PublicLoginRequest): Map<String, String> {
+        return mapOf("token" to authService.verifyPublicApiPassword(request.password))
     }
 }

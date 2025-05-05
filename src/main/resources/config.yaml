@@ -18,3 +18,6 @@ supabase:
   key: ${SUPABASE_SECRET_KEY}
 cors:
   origin: ${CORS_PRODUCTION_ORIGIN}
+public-api:
+  password: ${PUBLIC_API_PASSWORD_BCRYPT}
+  secret: ${PUBLIC_API_TOKEN_SECRET}
