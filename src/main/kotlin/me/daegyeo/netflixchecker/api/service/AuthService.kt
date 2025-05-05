@@ -78,6 +78,7 @@ class AuthService(
 
             return token
         } catch (e: Exception) {
+            if (e is ServiceException) throw e
             logger.error("인증코드용 공개 API 접근 비밀번호 검증 중 오류가 발생했습니다.", e)
             throw ServiceException("인증코드용 공개 API 접근 비밀번호 검증 중 오류가 발생했습니다.", 500)
         }
