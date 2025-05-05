@@ -23,7 +23,7 @@ class AuthController(private val authService: AuthService) {
     }
 
     @PostMapping("/public/login")
-    fun publicLogin(@RequestBody request: PublicLoginRequest): Boolean {
-        return authService.checkPublicApiPassword(request.password)
+    fun publicLogin(@RequestBody request: PublicLoginRequest): String {
+        return authService.verifyPublicApiPassword(request.password)
     }
 }

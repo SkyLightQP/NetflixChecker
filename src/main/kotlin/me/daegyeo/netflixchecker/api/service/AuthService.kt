@@ -5,11 +5,15 @@ import io.github.jan.supabase.exceptions.BadRequestRestException
 import io.github.jan.supabase.exceptions.UnknownRestException
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.builtin.Email
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.security.Keys
 import me.daegyeo.netflixchecker.api.exception.ServiceException
 import me.daegyeo.netflixchecker.config.PublicApiConfiguration
 import org.slf4j.LoggerFactory
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.time.Instant
+import java.util.Date
 
 @Service
 class AuthService(
@@ -51,17 +55,31 @@ class AuthService(
         }
     }
 
-    fun checkPublicApiPassword(inputPassword: String): Boolean {
+    fun verifyPublicApiPassword(inputPassword: String): String {
+        val TWO_MINUTES = 120000L
+
         try {
-            logger.info("인증코드용 공개 API 접근 비밀번호를 검증했습니다.")
             val result = passwordEncoder.matches(inputPassword, publicApiConfiguration.password)
             if (!result) {
                 logger.warn("인증코드용 공개 API 접근 비밀번호가 일치하지 않습니다.")
+                throw ServiceException("비밀번호가 올바르지 않습니다.", 401)
             }
-            return result
+
+            val currentTime = Instant.now().toEpochMilli()
+            val token =
+                Jwts.builder()
+                    .subject("public-api")
+                    .issuedAt(Date.from(Instant.now()))
+                    .expiration(Date(currentTime + TWO_MINUTES))
+                    .signWith(Keys.hmacShaKeyFor(publicApiConfiguration.secret.toByteArray()))
+                    .compact()
+
+            logger.info("인증코드용 공개 API 접근 비밀번호를 검증했습니다.")
+
+            return token
         } catch (e: Exception) {
             logger.error("인증코드용 공개 API 접근 비밀번호 검증 중 오류가 발생했습니다.", e)
+            throw ServiceException("인증코드용 공개 API 접근 비밀번호 검증 중 오류가 발생했습니다.", 500)
         }
-        return false
     }
 }
