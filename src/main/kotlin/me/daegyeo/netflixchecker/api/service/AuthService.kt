@@ -6,11 +6,17 @@ import io.github.jan.supabase.exceptions.UnknownRestException
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.builtin.Email
 import me.daegyeo.netflixchecker.api.exception.ServiceException
+import me.daegyeo.netflixchecker.config.PublicApiConfiguration
 import org.slf4j.LoggerFactory
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
 @Service
-class AuthService(private val supabaseClient: SupabaseClient) {
+class AuthService(
+    private val supabaseClient: SupabaseClient,
+    private val passwordEncoder: PasswordEncoder,
+    private val publicApiConfiguration: PublicApiConfiguration
+) {
     private val logger = LoggerFactory.getLogger(AuthService::class.java)
 
     suspend fun login(emailInput: String, passwordInput: String): String {
@@ -43,5 +49,15 @@ class AuthService(private val supabaseClient: SupabaseClient) {
         } catch (e: UnknownRestException) {
             return
         }
+    }
+
+    fun checkPublicApiPassword(inputPassword: String): Boolean {
+        try {
+            logger.info("인증코드용 공개 API 접근 비밀번호를 검증했습니다.")
+            return passwordEncoder.matches(inputPassword, publicApiConfiguration.password)
+        } catch (e: Exception) {
+            logger.error("인증코드용 공개 API 접근 비밀번호 검증 중 오류가 발생했습니다.", e)
+        }
+        return false
     }
 }
