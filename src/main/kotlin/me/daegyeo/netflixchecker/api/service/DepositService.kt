@@ -40,7 +40,7 @@ class DepositService(
     }
 
     fun addDepositor(data: AccountData) {
-        applicationEventPublisher.publishEvent(CompletedBankCrawlEvent(listOf(data)))
+        applicationEventPublisher.publishEvent(CompletedBankCrawlEvent(listOf(data), true))
         logger.info("새로운 입금 내역을 수동으로 추가했습니다.")
     }
 }

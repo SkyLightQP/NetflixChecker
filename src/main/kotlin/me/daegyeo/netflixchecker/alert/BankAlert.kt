@@ -43,7 +43,7 @@ class BankAlert(
                 if (log == null) {
                     val embed = EmbedUtil.create(
                         title = "넷플릭스 입금 확인",
-                        description = "(${it.who}) ${it.costMonth}달 치 확인 완료",
+                        description = "${if (event.isManual) "[수동] " else ""} (${it.who}) ${it.costMonth}달 확인 완료",
                         date = convertStringToInstant(it.date)
                     )
                     channel.createMessage(embed).block()
