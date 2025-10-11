@@ -56,6 +56,19 @@ class MetricsService {
         return count.value.toInt()
     }
 
+    fun getThisMonthCodeGeneratedCount(): Int {
+        val now = Instant.now().atZone(ZoneId.of("Asia/Seoul"))
+        val year = now.year.toString()
+        val month = now.monthValue.toString().padStart(2, '0')
+        val count = transaction {
+            Metric.find {
+                Metrics.key eq MetricsKey.CODE_GENERATED_COUNT_BY_MONTH.key.replace("{YEAR}", year)
+                    .replace("{MONTH}", month)
+            }.firstOrNull()
+        } ?: return 0
+        return count.value.toInt()
+    }
+
     fun getIsSuccessLatestCrawling(): Boolean {
         val data = transaction {
             Metric.find { Metrics.key eq MetricsKey.LATEST_CRAWLING_STATUS.key }.firstOrNull()
@@ -78,7 +91,7 @@ class MetricsService {
         val rawLog = Files.readString(filePath)
         val log = rawLog.split("\n").takeLast(80)
         val filteredLog = log.filter { !it.contains("Using generated security password") }
-        
+
         return filteredLog
     }
 }

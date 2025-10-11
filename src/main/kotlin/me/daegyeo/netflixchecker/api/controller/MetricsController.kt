@@ -23,9 +23,15 @@ class MetricsController(private val metricsService: MetricsService) {
     }
 
     @CheckAuth
-    @GetMapping("/code/count")
+    @GetMapping("/code/count/all")
     fun getCodeGeneratedCount(): Map<String, Int> {
         return mapOf("result" to metricsService.getCodeGeneratedCount())
+    }
+
+    @CheckAuth
+    @GetMapping("/code/count")
+    fun getThisMonthCodeGeneratedCount(): Map<String, Int> {
+        return mapOf("result" to metricsService.getThisMonthCodeGeneratedCount())
     }
 
     @CheckAuth

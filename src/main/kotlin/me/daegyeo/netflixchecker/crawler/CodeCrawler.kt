@@ -11,6 +11,8 @@ import org.jetbrains.exposed.sql.upsert
 import org.jsoup.Jsoup
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.Instant
+import java.time.ZoneId
 import java.util.*
 import javax.mail.*
 import javax.mail.internet.MimeBodyPart
@@ -79,6 +81,20 @@ class CodeCrawler(private val pop3Configuration: Pop3Configuration) {
                     where = { Metrics.key eq MetricsKey.CODE_GENERATED_COUNT.name }
                 ) {
                     it[key] = MetricsKey.CODE_GENERATED_COUNT.name
+                    it[value] = "1"
+                }
+
+                val now = Instant.now().atZone(ZoneId.of("Asia/Seoul"))
+                val year = now.year.toString()
+                val month = now.monthValue.toString().padStart(2, '0')
+                val thisMonthKey = MetricsKey.CODE_GENERATED_COUNT_BY_MONTH.key.replace("{YEAR}", year)
+                    .replace("{MONTH}", month)
+                Metrics.upsert(
+                    Metrics.key,
+                    onUpdate = listOf(Metrics.value to Metrics.value.castTo(IntegerColumnType()).plus(1)),
+                    where = { Metrics.key eq thisMonthKey }
+                ) {
+                    it[key] = thisMonthKey
                     it[value] = "1"
                 }
             }
