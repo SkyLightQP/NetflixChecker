@@ -7,7 +7,9 @@ import me.daegyeo.netflixchecker.enum.MetricsKey
 import me.daegyeo.netflixchecker.table.DepositLogs
 import me.daegyeo.netflixchecker.table.Metrics
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.javatime.month
+import org.jetbrains.exposed.sql.javatime.year
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Service
 import java.io.File
@@ -26,7 +28,7 @@ class MetricsService {
 
         val count = transaction {
             DepositLog.find {
-                DepositLogs.date.month() eq month
+                (DepositLogs.date.year() eq now.year) and (DepositLogs.date.month() eq month)
             }.count()
         }
 
@@ -39,7 +41,7 @@ class MetricsService {
 
         val query = transaction {
             DepositLog.find {
-                DepositLogs.date.month() eq month
+                (DepositLogs.date.year() eq now.year) and (DepositLogs.date.month() eq month)
             }.orderBy(DepositLogs.date to SortOrder.DESC).limit(1).firstOrNull()
         }
         val dec = DecimalFormat("#,###")
