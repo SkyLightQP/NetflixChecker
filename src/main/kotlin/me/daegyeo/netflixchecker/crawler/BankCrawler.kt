@@ -7,6 +7,7 @@ import me.daegyeo.netflixchecker.config.SeleniumConfiguration
 import me.daegyeo.netflixchecker.config.VaultConfiguration
 import me.daegyeo.netflixchecker.data.AccountData
 import me.daegyeo.netflixchecker.enum.MetricsKey
+import me.daegyeo.netflixchecker.event.OccurredCrawlErrorEvent
 import me.daegyeo.netflixchecker.table.Metrics
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.upsert
@@ -19,6 +20,7 @@ import org.openqa.selenium.remote.RemoteWebDriver
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 import java.net.URL
 import java.time.Duration
@@ -35,7 +37,8 @@ enum class ButtonType {
 @Component
 class BankCrawler(
     private val seleniumConfiguration: SeleniumConfiguration,
-    private val bankConfiguration: BankConfiguration
+    private val bankConfiguration: BankConfiguration,
+    private val applicationEventPublisher: ApplicationEventPublisher
 ) {
     private val DRIVER_NAME = "webdriver.chrome.driver"
     private val DRIVER_PATH = "chromedriver.exe"
@@ -230,6 +233,7 @@ class BankCrawler(
             return result
         } catch (e: Exception) {
             logger.error("은행 크롤링 중 오류가 발생했습니다. 브라우저를 닫습니다.", e)
+            applicationEventPublisher.publishEvent(OccurredCrawlErrorEvent("Bank", e.message ?: ""))
             closeBrowser()
             transaction {
                 Metrics.upsert(Metrics.key, where = { Metrics.key eq MetricsKey.LATEST_CRAWLING_STATUS.name }) {

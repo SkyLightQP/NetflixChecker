@@ -7,7 +7,7 @@ import java.time.Instant
 object EmbedUtil {
     fun create(title: String, description: String, date: Instant = Instant.now()): EmbedCreateSpec {
         return EmbedCreateSpec.builder()
-            .color(Color.of(253, 121, 168))
+            .color(Color.of(191, 9, 47))
             .title(title)
             .description(description)
             .timestamp(date)
