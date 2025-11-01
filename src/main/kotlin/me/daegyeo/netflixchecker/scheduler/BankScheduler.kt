@@ -6,7 +6,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 @Component
 class BankScheduler(
@@ -14,14 +16,14 @@ class BankScheduler(
     private val applicationEventPublisher: ApplicationEventPublisher
 ) {
     private val logger = LoggerFactory.getLogger(BankScheduler::class.java)
-    private val BANK_MAINTENANCE_START = LocalDateTime.now().withHour(23).withMinute(0).withSecond(0)
-    private val BANK_MAINTENANCE_END_HOUR = LocalDateTime.now().withHour(1).withMinute(0).withSecond(0)
+    private val KST_ZONE = ZoneId.of("Asia/Seoul")
 
     @Scheduled(cron = "0 0 */6 * * *")
     fun schedule() {
-        val now = LocalDateTime.now()
-        if (now.isAfter(BANK_MAINTENANCE_START) && now.isBefore(BANK_MAINTENANCE_END_HOUR)) {
-            logger.info("은행 점검 시간입니다. 크롤링을 하지 않습니다.")
+        val now = ZonedDateTime.now(KST_ZONE)
+
+        if (isMaintenanceTime(now)) {
+            logger.info("은행 점검 시간입니다. 크롤링 요청을 무시합니다. (23:30 ~ 01:00)")
             return
         }
 
@@ -32,5 +34,16 @@ class BankScheduler(
         bankCrawler.closeBrowser()
 
         applicationEventPublisher.publishEvent(CompletedBankCrawlEvent(result))
+    }
+
+    private fun isMaintenanceTime(now: ZonedDateTime): Boolean {
+        val currentTime = now.toLocalTime()
+        val maintenanceStart = LocalTime.of(23, 30)
+        val maintenanceEnd = LocalTime.of(1, 0)
+
+        return currentTime.isAfter(maintenanceStart) ||
+               currentTime.isBefore(maintenanceEnd) ||
+               currentTime.equals(maintenanceStart) ||
+               currentTime.equals(maintenanceEnd)
     }
 }
