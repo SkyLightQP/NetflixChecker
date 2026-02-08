@@ -1,8 +1,9 @@
 package me.daegyeo.netflixchecker.command
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
-import me.daegyeo.netflixchecker.config.DiscordConfiguration
+import me.daegyeo.netflixchecker.config.FeatureFlagConfiguration
 import me.daegyeo.netflixchecker.crawler.BankCrawler
+import me.daegyeo.netflixchecker.enum.FeatureFlagKey
 import me.daegyeo.netflixchecker.event.CompletedBankCrawlEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
@@ -12,7 +13,7 @@ import reactor.core.publisher.Mono
 class CrawlCommand(
     private val bankCrawler: BankCrawler,
     private val applicationEventPublisher: ApplicationEventPublisher,
-    private val discordConfiguration: DiscordConfiguration
+    private val featureFlagConfiguration: FeatureFlagConfiguration,
 ) : Command {
     override val name: String = "크롤링"
 
@@ -21,7 +22,7 @@ class CrawlCommand(
     override val options: List<CommandOption> = arrayListOf()
 
     override fun handle(event: ChatInputInteractionEvent): Mono<Void> {
-        if (event.interaction.user.id.asString() != discordConfiguration.admin) {
+        if (event.interaction.user.id.asString() != featureFlagConfiguration.getString(FeatureFlagKey.DISCORD_ADMIN_ID)) {
             return event.reply()
                 .withEphemeral(true)
                 .withContent("권한이 없습니다.")

@@ -2,10 +2,11 @@ package me.daegyeo.netflixchecker.crawler
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import me.daegyeo.netflixchecker.config.BankConfiguration
+import me.daegyeo.netflixchecker.config.FeatureFlagConfiguration
 import me.daegyeo.netflixchecker.config.SeleniumConfiguration
 import me.daegyeo.netflixchecker.config.VaultConfiguration
 import me.daegyeo.netflixchecker.data.AccountData
+import me.daegyeo.netflixchecker.enum.FeatureFlagKey
 import me.daegyeo.netflixchecker.enum.MetricsKey
 import me.daegyeo.netflixchecker.event.OccurredCrawlErrorEvent
 import me.daegyeo.netflixchecker.table.Metrics
@@ -37,8 +38,8 @@ enum class ButtonType {
 @Component
 class BankCrawler(
     private val seleniumConfiguration: SeleniumConfiguration,
-    private val bankConfiguration: BankConfiguration,
-    private val applicationEventPublisher: ApplicationEventPublisher
+    private val applicationEventPublisher: ApplicationEventPublisher,
+    private val featureFlagConfiguration: FeatureFlagConfiguration
 ) {
     private val DRIVER_NAME = "webdriver.chrome.driver"
     private val DRIVER_PATH = "chromedriver.exe"
@@ -193,7 +194,9 @@ class BankCrawler(
                 .split(", ")
 
             if (who in targetNames && normalizeCost != 0) {
-                val costMonth = round(normalizeCost / bankConfiguration.cost.toDouble()).toInt().toString()
+                val costMonth =
+                    round(normalizeCost / featureFlagConfiguration.getInt(FeatureFlagKey.BANK_COST).toDouble()).toInt()
+                        .toString()
                 result.add(AccountData(time, date, normalizeCost.toString(), who, costMonth))
             }
 

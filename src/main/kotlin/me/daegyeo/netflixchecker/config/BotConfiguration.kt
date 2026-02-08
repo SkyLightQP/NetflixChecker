@@ -5,13 +5,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "discord")
 data class DiscordConfiguration(
     val botToken: String = "",
-    val channel: String = "",
-    val admin: String = ""
-)
-
-@ConfigurationProperties(prefix = "bank")
-data class BankConfiguration(
-    val cost: Int = 0
 )
 
 @ConfigurationProperties(prefix = "selenium")

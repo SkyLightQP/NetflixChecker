@@ -3,8 +3,9 @@ package me.daegyeo.netflixchecker.alert
 import discord4j.common.util.Snowflake
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.`object`.entity.channel.GuildMessageChannel
-import me.daegyeo.netflixchecker.config.DiscordConfiguration
+import me.daegyeo.netflixchecker.config.FeatureFlagConfiguration
 import me.daegyeo.netflixchecker.entity.DepositLog
+import me.daegyeo.netflixchecker.enum.FeatureFlagKey
 import me.daegyeo.netflixchecker.event.CompletedBankCrawlEvent
 import me.daegyeo.netflixchecker.shared.util.EmbedUtil
 import me.daegyeo.netflixchecker.table.DepositLogs
@@ -22,14 +23,16 @@ import java.util.*
 
 @Component
 class BankAlert(
-    private val gatewayDiscordClient: GatewayDiscordClient, private val discordConfiguration: DiscordConfiguration
+    private val gatewayDiscordClient: GatewayDiscordClient,
+    private val featureFlagConfiguration: FeatureFlagConfiguration
 ) {
     private val logger = LoggerFactory.getLogger(BankAlert::class.java)
 
     @EventListener
     fun sendDepositLogAlert(event: CompletedBankCrawlEvent) {
-        val channel = gatewayDiscordClient.getChannelById(Snowflake.of(discordConfiguration.channel))
-            .ofType(GuildMessageChannel::class.java).block()!!
+        val channel =
+            gatewayDiscordClient.getChannelById(Snowflake.of(featureFlagConfiguration.getString(FeatureFlagKey.DISCORD_CHANNEL_ID)))
+                .ofType(GuildMessageChannel::class.java).block()!!
 
         if (event.data.isEmpty()) return
 
