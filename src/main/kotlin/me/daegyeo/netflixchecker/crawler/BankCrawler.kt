@@ -23,7 +23,7 @@ import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
-import java.net.URL
+import java.net.URI
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -66,7 +66,7 @@ class BankCrawler(
             System.setProperty(DRIVER_NAME, DRIVER_PATH)
             ChromeDriver(option)
         } else {
-            RemoteWebDriver(URL(seleniumConfiguration.host), option)
+            RemoteWebDriver(URI(seleniumConfiguration.host).toURL(), option)
         }
 
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(WAIT_SECONDS))
