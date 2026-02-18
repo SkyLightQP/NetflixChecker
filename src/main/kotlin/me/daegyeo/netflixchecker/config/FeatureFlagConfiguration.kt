@@ -50,8 +50,8 @@ class FeatureFlagConfiguration {
 
     fun getAllFlags(): Map<String, String> {
         return transaction {
-            val settingsByKey = Setting.Companion.all().associateBy { it.key }
-            FeatureFlagKey.values().associate { featureKey ->
+            val settingsByKey = Setting.all().associateBy { it.key }
+            FeatureFlagKey.entries.associate { featureKey ->
                 val dbValue = settingsByKey[featureKey.key]?.value
                 featureKey.key to (dbValue ?: featureKey.defaultValue)
             }
