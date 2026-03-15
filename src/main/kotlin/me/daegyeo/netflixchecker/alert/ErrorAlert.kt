@@ -18,8 +18,8 @@ class ErrorAlert(
 ) {
     @EventListener
     fun sendErrorAlert(event: OccurredCrawlErrorEvent) {
-        if ((event.type == "BANK" && !featureFlagConfiguration.getBoolean(FeatureFlagKey.ENABLE_BANK_CRAWLING_ERROR_ALERT)) ||
-            (event.type == "CODE" && !featureFlagConfiguration.getBoolean(FeatureFlagKey.ENABLE_CODE_CRAWLING_ERROR_ALERT))
+        if ((event.type == "Bank" && !featureFlagConfiguration.getBoolean(FeatureFlagKey.ENABLE_BANK_CRAWLING_ERROR_ALERT)) ||
+            (event.type == "Code" && !featureFlagConfiguration.getBoolean(FeatureFlagKey.ENABLE_CODE_CRAWLING_ERROR_ALERT))
         ) {
             return
         }
