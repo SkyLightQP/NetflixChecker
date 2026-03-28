@@ -1,9 +1,5 @@
 discord:
   bot-token: ${DISCORD_BOT_TOKEN}
-  channel: ${DISCORD_CHANNEL_ID}
-  admin: ${DISCORD_ADMIN_ID}
-bank:
-  cost: ${BANK_COST}
 selenium:
   use-remote: ${SELENIUM_USE_REMOTE}
   host: ${SELENIUM_REMOTE_HOST}

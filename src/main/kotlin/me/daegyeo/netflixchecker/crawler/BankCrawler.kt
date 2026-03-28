@@ -2,10 +2,11 @@ package me.daegyeo.netflixchecker.crawler
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import me.daegyeo.netflixchecker.config.BankConfiguration
+import me.daegyeo.netflixchecker.config.FeatureFlagConfiguration
 import me.daegyeo.netflixchecker.config.SeleniumConfiguration
 import me.daegyeo.netflixchecker.config.VaultConfiguration
 import me.daegyeo.netflixchecker.data.AccountData
+import me.daegyeo.netflixchecker.enum.FeatureFlagKey
 import me.daegyeo.netflixchecker.enum.MetricsKey
 import me.daegyeo.netflixchecker.event.OccurredCrawlErrorEvent
 import me.daegyeo.netflixchecker.table.Metrics
@@ -22,7 +23,7 @@ import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
-import java.net.URL
+import java.net.URI
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -37,8 +38,8 @@ enum class ButtonType {
 @Component
 class BankCrawler(
     private val seleniumConfiguration: SeleniumConfiguration,
-    private val bankConfiguration: BankConfiguration,
-    private val applicationEventPublisher: ApplicationEventPublisher
+    private val applicationEventPublisher: ApplicationEventPublisher,
+    private val featureFlagConfiguration: FeatureFlagConfiguration
 ) {
     private val DRIVER_NAME = "webdriver.chrome.driver"
     private val DRIVER_PATH = "chromedriver.exe"
@@ -65,7 +66,7 @@ class BankCrawler(
             System.setProperty(DRIVER_NAME, DRIVER_PATH)
             ChromeDriver(option)
         } else {
-            RemoteWebDriver(URL(seleniumConfiguration.host), option)
+            RemoteWebDriver(URI(seleniumConfiguration.host).toURL(), option)
         }
 
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(WAIT_SECONDS))
@@ -193,7 +194,9 @@ class BankCrawler(
                 .split(", ")
 
             if (who in targetNames && normalizeCost != 0) {
-                val costMonth = round(normalizeCost / bankConfiguration.cost.toDouble()).toInt().toString()
+                val costMonth =
+                    round(normalizeCost / featureFlagConfiguration.getInt(FeatureFlagKey.BANK_COST).toDouble()).toInt()
+                        .toString()
                 result.add(AccountData(time, date, normalizeCost.toString(), who, costMonth))
             }
 
