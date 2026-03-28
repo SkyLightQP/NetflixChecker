@@ -3,6 +3,8 @@ package me.daegyeo.netflixchecker.config
 import me.daegyeo.netflixchecker.entity.Setting
 import me.daegyeo.netflixchecker.enum.FeatureFlagKey
 import me.daegyeo.netflixchecker.table.Settings
+import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.upsert
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Service
 
@@ -11,7 +13,7 @@ class FeatureFlagConfiguration {
 
     fun getString(key: FeatureFlagKey): String {
         return transaction {
-            Setting.Companion.find { Settings.key eq key.key }
+            Setting.find { Settings.key eq key.key }
                 .firstOrNull()
                 ?.value
                 ?: key.defaultValue
@@ -28,14 +30,9 @@ class FeatureFlagConfiguration {
 
     fun setString(key: FeatureFlagKey, value: String) {
         transaction {
-            val existing = Setting.Companion.find { Settings.key eq key.key }.firstOrNull()
-            if (existing != null) {
-                existing.value = value
-            } else {
-                Setting.Companion.new(key.key) {
-                    this.key = key.key
-                    this.value = value
-                }
+            Settings.upsert(Settings.id) {
+                it[Settings.id] = EntityID(key.key, Settings)
+                it[Settings.value] = value
             }
         }
     }
