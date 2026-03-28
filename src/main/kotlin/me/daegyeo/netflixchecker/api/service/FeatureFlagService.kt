@@ -25,9 +25,9 @@ class FeatureFlagService(
 
         logger.info("FeatureFlag를 설정했습니다. key=$key, value=$value")
 
-        val normalizedKey = featureFlagKey.key.lowercase()
-        if (normalizedKey == "true" || normalizedKey == "false") {
-            featureFlagConfiguration.setBoolean(featureFlagKey, normalizedKey.toBoolean())
+        val normalizedValue = value.lowercase()
+        if (normalizedValue == "true" || normalizedValue == "false") {
+            featureFlagConfiguration.setBoolean(featureFlagKey, normalizedValue.toBoolean())
             return
         }
 
