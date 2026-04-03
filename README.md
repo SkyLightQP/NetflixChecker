@@ -37,11 +37,6 @@ docker run --env-file=.env -v ./data:/workspace/data --name netflixchecker -d ne
 ```dotenv
 # 디스코드 봇 설정
 DISCORD_BOT_TOKEN=
-DISCORD_CHANNEL_ID=
-DISCORD_ADMIN_ID=
-
-# 확인할 입금 가격
-BANK_COST=
 
 # Selenium 정보
 SELENIUM_USE_REMOTE=false
@@ -77,3 +72,8 @@ CORS_PRODUCTION_ORIGIN=
 | `bank_site_id`          | 은행 홈페이지 아이디                                |
 | `bank_site_password`    | 은행 홈페이지 비밀번호                               |
 | `bank_account_password` | 은행 계좌 비밀번호                                 |
+
+## Feature Flag
+
+- 디스코드 채널 및 관리자 설정, 입금 가격 등 일부 설정은 Feature Flag를 통해 설정해야 합니다.
+- 관리자 대시보드 또는 DB 수동 변경을 통해 설정할 수 있습니다.
