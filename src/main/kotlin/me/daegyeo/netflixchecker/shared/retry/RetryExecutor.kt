@@ -1,7 +1,5 @@
 package me.daegyeo.netflixchecker.shared.retry
 
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.delay
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.random.Random
