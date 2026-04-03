@@ -9,12 +9,16 @@ import me.daegyeo.netflixchecker.data.AccountData
 import me.daegyeo.netflixchecker.enum.FeatureFlagKey
 import me.daegyeo.netflixchecker.enum.MetricsKey
 import me.daegyeo.netflixchecker.event.OccurredCrawlErrorEvent
+import me.daegyeo.netflixchecker.shared.retry.RetryExecutor
+import me.daegyeo.netflixchecker.shared.retry.RetryPolicy
 import me.daegyeo.netflixchecker.table.Metrics
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.upsert
 import org.jsoup.Jsoup
 import org.openqa.selenium.By
+import org.openqa.selenium.TimeoutException
 import org.openqa.selenium.WebDriver
+import org.openqa.selenium.WebDriverException
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.remote.RemoteWebDriver
@@ -23,12 +27,16 @@ import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
+import java.io.IOException
+import java.net.ConnectException
 import java.net.URI
+import java.net.SocketTimeoutException
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.round
+import kotlin.time.Duration.Companion.milliseconds
 
 
 enum class ButtonType {
@@ -48,6 +56,7 @@ class BankCrawler(
     private val BUTTON_WAIT_SECONDS: Long = 1
 
     lateinit var driver: WebDriver
+    private var isBrowserOpen: Boolean = false
 
     private val logger = LoggerFactory.getLogger(BankCrawler::class.java)
 
@@ -70,9 +79,22 @@ class BankCrawler(
         }
 
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(WAIT_SECONDS))
+        isBrowserOpen = true
     }
 
-    fun closeBrowser() = driver.quit()
+    fun closeBrowser() {
+        if (!isBrowserOpen) {
+            return
+        }
+
+        runCatching {
+            driver.quit()
+        }.onFailure {
+            logger.warn("브라우저 종료 중 오류가 발생했습니다.", it)
+        }
+
+        isBrowserOpen = false
+    }
 
     private fun delayUntilClickable(seconds: Long, locator: By) =
         WebDriverWait(driver, Duration.ofSeconds(seconds)).until(ExpectedConditions.elementToBeClickable(locator))
@@ -123,7 +145,7 @@ class BankCrawler(
         driver.findElement(By.xpath("//a[@aria-label='재배열']")).click()
         VaultConfiguration.BANK_SITE_PASSWORD.forEach {
             runBlocking {
-                delay(BUTTON_WAIT_SECONDS * 1000)
+                delay((BUTTON_WAIT_SECONDS * 1000).milliseconds)
             }
             when {
                 it.isUpperCase() -> clickSecureButton(ButtonType.SHIFT, it.toString())
@@ -151,7 +173,7 @@ class BankCrawler(
         driver.findElement(By.xpath("//*[@class=\"w2textbox mt5\"]")).click()
         driver.findElement(By.xpath("//*[@id=\"sbx_accno_input_0\"]/option[2]")).click()
 
-        runBlocking { delay(BUTTON_WAIT_SECONDS * 1000) }
+        runBlocking { delay((BUTTON_WAIT_SECONDS * 1000).milliseconds) }
         driver.findElement(By.xpath("//*[@id=\"계좌비밀번호\"]")).click()
 
         WebDriverWait(
@@ -159,7 +181,7 @@ class BankCrawler(
         ).until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"mtk_계좌비밀번호\"]")))
         VaultConfiguration.BANK_ACCOUNT_PASSWORD.forEach {
             runBlocking {
-                delay(BUTTON_WAIT_SECONDS * 1000)
+                delay((BUTTON_WAIT_SECONDS * 1000).milliseconds)
             }
             clickSecureButton(ButtonType.NORMAL, it.toString())
         }
@@ -218,11 +240,42 @@ class BankCrawler(
             .ofPattern("yyyy-MM-dd HH:mm:ss")
             .withZone(ZoneId.of("Asia/Seoul"))
 
+        val retryPolicy = RetryPolicy(
+            maxAttempts = featureFlagConfiguration.getInt(FeatureFlagKey.MAX_RETRY_COUNT).coerceAtLeast(1),
+            initialDelayMillis = 2_000,
+            multiplier = 2.0,
+            maxDelayMillis = 20_000,
+            jitterMillis = 1_000,
+            shouldRetry = ::isRetryableException,
+            onRetry = {
+                logger.warn(
+                    "은행 크롤링 재시도({}/{}) - nextDelay={}ms, operation={}, exception={}({})",
+                    it.attempt,
+                    it.maxAttempts,
+                    it.nextDelayMillis,
+                    it.operationName,
+                    it.throwable.javaClass.simpleName,
+                    it.throwable.message ?: ""
+                )
+                closeBrowser()
+            }
+        )
+
         try {
-            driver.get(BANK_URL)
-            loginBank()
-            selectBankAccount()
-            val result = getAccountData()
+            val result = RetryExecutor.run(
+                policy = retryPolicy,
+                operationName = "bank-crawler.crawl"
+            ) {
+                if (!isBrowserOpen) {
+                    openBrowser()
+                }
+
+                driver.get(BANK_URL)
+                loginBank()
+                selectBankAccount()
+                getAccountData()
+            }
+
             transaction {
                 Metrics.upsert(Metrics.key, where = { Metrics.key eq MetricsKey.LATEST_CRAWLING_STATUS.name }) {
                     it[key] = MetricsKey.LATEST_CRAWLING_STATUS.name
@@ -246,5 +299,24 @@ class BankCrawler(
             }
             return emptyList()
         }
+    }
+
+    private fun isRetryableException(throwable: Throwable): Boolean {
+        if (throwable is InterruptedException) {
+            Thread.currentThread().interrupt()
+            return false
+        }
+
+        if (throwable is TimeoutException ||
+            throwable is WebDriverException ||
+            throwable is SocketTimeoutException ||
+            throwable is ConnectException ||
+            throwable is IOException
+        ) {
+            return true
+        }
+
+        val cause = throwable.cause ?: return false
+        return isRetryableException(cause)
     }
 }

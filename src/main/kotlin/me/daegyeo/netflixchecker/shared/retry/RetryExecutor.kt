@@ -71,48 +71,6 @@ object RetryExecutor {
         error("RetryExecutor reached an impossible state")
     }
 
-    suspend fun <T> runSuspend(
-        policy: RetryPolicy,
-        operationName: String,
-        block: suspend () -> T,
-    ): T {
-        for (attempt in 1..policy.maxAttempts) {
-            try {
-                return block()
-            } catch (throwable: Exception) {
-                if (throwable is CancellationException) {
-                    throw throwable
-                }
-
-                if (throwable is InterruptedException) {
-                    Thread.currentThread().interrupt()
-                    throw throwable
-                }
-
-                if (!shouldRetry(policy, attempt, throwable)) {
-                    throw throwable
-                }
-
-                val nextDelayMillis = calculateDelayMillis(policy, attempt)
-                policy.onRetry?.invoke(
-                    RetryAttemptContext(
-                        operationName = operationName,
-                        attempt = attempt,
-                        maxAttempts = policy.maxAttempts,
-                        nextDelayMillis = nextDelayMillis,
-                        throwable = throwable,
-                    )
-                )
-
-                if (nextDelayMillis > 0) {
-                    delay(nextDelayMillis)
-                }
-            }
-        }
-
-        error("RetryExecutor reached an impossible state")
-    }
-
     private fun shouldRetry(policy: RetryPolicy, attempt: Int, throwable: Throwable): Boolean {
         val isLastAttempt = attempt >= policy.maxAttempts
         return !isLastAttempt && policy.shouldRetry(throwable)
