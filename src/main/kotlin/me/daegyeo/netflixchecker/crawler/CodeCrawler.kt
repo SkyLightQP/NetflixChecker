@@ -2,8 +2,12 @@ package me.daegyeo.netflixchecker.crawler
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import me.daegyeo.netflixchecker.config.FeatureFlagConfiguration
 import me.daegyeo.netflixchecker.config.Pop3Configuration
+import me.daegyeo.netflixchecker.enum.FeatureFlagKey
 import me.daegyeo.netflixchecker.enum.MetricsKey
+import me.daegyeo.netflixchecker.shared.retry.RetryExecutor
+import me.daegyeo.netflixchecker.shared.retry.RetryPolicy
 import me.daegyeo.netflixchecker.table.Metrics
 import org.jetbrains.exposed.sql.IntegerColumnType
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
@@ -14,6 +18,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.io.IOException
 import java.time.Instant
 import java.time.ZoneId
 import java.util.*
@@ -23,10 +28,13 @@ import javax.mail.internet.MimeBodyPart
 
 data class VerificationCode(val text: String, val link: String)
 
+private class VerificationCodeNotFoundException : RuntimeException("Verification code not found")
+
 @Component
 class CodeCrawler(
     private val pop3Configuration: Pop3Configuration,
-    private val coroutineScope: CoroutineScope
+    private val coroutineScope: CoroutineScope,
+    private val featureFlagConfiguration: FeatureFlagConfiguration
 ) {
     private val logger = LoggerFactory.getLogger(CodeCrawler::class.java)
 
@@ -54,6 +62,40 @@ class CodeCrawler(
     }
 
     fun getVerificationCode(): VerificationCode {
+        val retryPolicy = RetryPolicy(
+            maxAttempts = featureFlagConfiguration.getInt(FeatureFlagKey.MAX_RETRY_COUNT).coerceAtLeast(1),
+            initialDelayMillis = 750,
+            multiplier = 2.0,
+            maxDelayMillis = 5_000,
+            jitterMillis = 250,
+            shouldRetry = ::isRetryableException,
+            onRetry = {
+                logger.warn(
+                    "인증코드 조회 재시도({}/{}) - nextDelay={}ms, operation={}, exception={}({})",
+                    it.attempt,
+                    it.maxAttempts,
+                    it.nextDelayMillis,
+                    it.operationName,
+                    it.throwable.javaClass.simpleName,
+                    it.throwable.message ?: ""
+                )
+            }
+        )
+
+        return try {
+            RetryExecutor.run(
+                policy = retryPolicy,
+                operationName = "code-crawler.getVerificationCode"
+            ) {
+                getVerificationCodeOnce()
+            }
+        } catch (e: VerificationCodeNotFoundException) {
+            logger.info("재시도 이후에도 최근 발송된 인증코드를 찾지 못했습니다.")
+            VerificationCode("", "")
+        }
+    }
+
+    private fun getVerificationCodeOnce(): VerificationCode {
         val store = createMailClient()
         var inbox: Folder? = null
 
@@ -65,21 +107,30 @@ class CodeCrawler(
 
             for (i in messages.size - 1 downTo (messages.size - 10).coerceAtLeast(0)) {
                 val result = crawlVerificationCode(messages[i]) ?: continue
-                coroutineScope.launch {
-                    runCatching {
-                        recordMetrics()
-                    }.onFailure {
-                        logger.error("인증코드 metrics 기록 중 오류가 발생했습니다.", it)
-                    }
-                }
+                recordMetricsAsyncSafely()
                 return result
             }
 
-            return VerificationCode("", "")
+            throw VerificationCodeNotFoundException()
         } finally {
             closeFolder(inbox)
             closeStore(store)
         }
+    }
+
+    private fun isRetryableException(throwable: Throwable): Boolean {
+        if (throwable is VerificationCodeNotFoundException) {
+            return true
+        }
+        if (throwable is AuthenticationFailedException) {
+            return false
+        }
+        if (throwable is MessagingException || throwable is IOException) {
+            return true
+        }
+
+        val cause = throwable.cause ?: return false
+        return isRetryableException(cause)
     }
 
     private fun crawlVerificationCode(message: Message): VerificationCode? {
@@ -121,30 +172,40 @@ class CodeCrawler(
         return VerificationCode(text, code)
     }
 
-    private fun recordMetrics() {
-        transaction {
-            Metrics.upsert(
-                Metrics.key,
-                onUpdate = listOf(Metrics.value to Metrics.value.castTo(IntegerColumnType()).plus(1)),
-                where = { Metrics.key eq MetricsKey.CODE_GENERATED_COUNT.name }
-            ) {
-                it[key] = MetricsKey.CODE_GENERATED_COUNT.name
-                it[value] = "1"
-            }
+    private fun recordMetricsAsyncSafely() {
+        runCatching {
+            coroutineScope.launch {
+                runCatching {
+                    transaction {
+                        Metrics.upsert(
+                            Metrics.key,
+                            onUpdate = listOf(Metrics.value to Metrics.value.castTo(IntegerColumnType()).plus(1)),
+                            where = { Metrics.key eq MetricsKey.CODE_GENERATED_COUNT.name }
+                        ) {
+                            it[key] = MetricsKey.CODE_GENERATED_COUNT.name
+                            it[value] = "1"
+                        }
 
-            val now = Instant.now().atZone(ZoneId.of("Asia/Seoul"))
-            val year = now.year.toString()
-            val month = now.monthValue.toString().padStart(2, '0')
-            val thisMonthKey = MetricsKey.CODE_GENERATED_COUNT_BY_MONTH.key.replace("{YEAR}", year)
-                .replace("{MONTH}", month)
-            Metrics.upsert(
-                Metrics.key,
-                onUpdate = listOf(Metrics.value to Metrics.value.castTo(IntegerColumnType()).plus(1)),
-                where = { Metrics.key eq thisMonthKey }
-            ) {
-                it[key] = thisMonthKey
-                it[value] = "1"
+                        val now = Instant.now().atZone(ZoneId.of("Asia/Seoul"))
+                        val year = now.year.toString()
+                        val month = now.monthValue.toString().padStart(2, '0')
+                        val thisMonthKey = MetricsKey.CODE_GENERATED_COUNT_BY_MONTH.key.replace("{YEAR}", year)
+                            .replace("{MONTH}", month)
+                        Metrics.upsert(
+                            Metrics.key,
+                            onUpdate = listOf(Metrics.value to Metrics.value.castTo(IntegerColumnType()).plus(1)),
+                            where = { Metrics.key eq thisMonthKey }
+                        ) {
+                            it[key] = thisMonthKey
+                            it[value] = "1"
+                        }
+                    }
+                }.onFailure {
+                    logger.error("인증코드 metrics 기록 중 오류가 발생했습니다.", it)
+                }
             }
+        }.onFailure {
+            logger.error("인증코드 metrics 작업 시작 중 오류가 발생했습니다.", it)
         }
     }
 
