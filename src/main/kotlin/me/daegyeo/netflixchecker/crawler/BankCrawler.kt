@@ -55,12 +55,15 @@ class BankCrawler(
     private val WAIT_SECONDS: Long = 8
     private val BUTTON_WAIT_SECONDS: Long = 1
 
-    lateinit var driver: WebDriver
-    private var isBrowserOpen: Boolean = false
+    private var driver: WebDriver? = null
 
     private val logger = LoggerFactory.getLogger(BankCrawler::class.java)
 
+    private fun requireDriver(): WebDriver = driver ?: error("Browser is not open.")
+
     fun openBrowser() {
+        closeBrowser()
+
         val isRemote = seleniumConfiguration.useRemote
         val option = ChromeOptions()
         if (seleniumConfiguration.useHeadless) {
@@ -71,35 +74,42 @@ class BankCrawler(
         val mobileEmulation = hashMapOf("deviceName" to "Samsung Galaxy S20 Ultra")
         option.setExperimentalOption("mobileEmulation", mobileEmulation)
 
-        driver = if (!isRemote) {
+        val createdDriver = if (!isRemote) {
             System.setProperty(DRIVER_NAME, DRIVER_PATH)
             ChromeDriver(option)
         } else {
             RemoteWebDriver(URI(seleniumConfiguration.host).toURL(), option)
         }
 
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(WAIT_SECONDS))
-        isBrowserOpen = true
+        try {
+            createdDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(WAIT_SECONDS))
+            driver = createdDriver
+        } catch (e: Exception) {
+            runCatching {
+                createdDriver.quit()
+            }.onFailure {
+                logger.warn("브라우저 초기화 실패 후 정리 중 오류가 발생했습니다.", it)
+            }
+            throw e
+        }
     }
 
     fun closeBrowser() {
-        if (!isBrowserOpen) {
-            return
-        }
+        val currentDriver = driver ?: return
+        driver = null
 
         runCatching {
-            driver.quit()
+            currentDriver.quit()
         }.onFailure {
             logger.warn("브라우저 종료 중 오류가 발생했습니다.", it)
         }
-
-        isBrowserOpen = false
     }
 
     private fun delayUntilClickable(seconds: Long, locator: By) =
-        WebDriverWait(driver, Duration.ofSeconds(seconds)).until(ExpectedConditions.elementToBeClickable(locator))
+        WebDriverWait(requireDriver(), Duration.ofSeconds(seconds)).until(ExpectedConditions.elementToBeClickable(locator))
 
     private fun clickSecureButton(buttonType: ButtonType, value: String) {
+        val driver = requireDriver()
         val keyXPath = By.xpath("//a[@aria-label='$value']")
         val uppercaseKeyXPath = By.xpath("//a[@aria-label='대문자${value.uppercase()}']")
         val specialKeyXPath = By.xpath("//a[@aria-label='특수키']")
@@ -132,6 +142,8 @@ class BankCrawler(
     }
 
     private fun loginBank() {
+        val driver = requireDriver()
+
         WebDriverWait(driver, Duration.ofSeconds(WAIT_SECONDS)).until(
             ExpectedConditions.elementToBeClickable(By.id("btn_idLogin"))
         )
@@ -170,6 +182,8 @@ class BankCrawler(
     }
 
     private fun selectBankAccount() {
+        val driver = requireDriver()
+
         driver.findElement(By.xpath("//*[@class=\"w2textbox mt5\"]")).click()
         driver.findElement(By.xpath("//*[@id=\"sbx_accno_input_0\"]/option[2]")).click()
 
@@ -193,6 +207,7 @@ class BankCrawler(
     }
 
     private fun getAccountData(): List<AccountData> {
+        val driver = requireDriver()
         val result = arrayListOf<AccountData>()
         val original = driver.findElements(By.cssSelector("#F01_grd_list_body_tbody > tr"))
 
@@ -266,11 +281,11 @@ class BankCrawler(
                 policy = retryPolicy,
                 operationName = "bank-crawler.crawl"
             ) {
-                if (!isBrowserOpen) {
+                if (driver == null) {
                     openBrowser()
                 }
 
-                driver.get(BANK_URL)
+                requireDriver().get(BANK_URL)
                 loginBank()
                 selectBankAccount()
                 getAccountData()
