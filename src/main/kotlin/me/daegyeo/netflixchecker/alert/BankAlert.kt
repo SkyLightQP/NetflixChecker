@@ -36,6 +36,8 @@ class BankAlert(
 
         if (event.data.isEmpty()) return
 
+        val bankCost = featureFlagConfiguration.getInt(FeatureFlagKey.BANK_COST)
+
         transaction {
             var count = 0
             event.data.forEach {
@@ -44,9 +46,16 @@ class BankAlert(
                 }.firstOrNull()
 
                 if (log == null) {
+                    val baseDescription =
+                        "${if (event.isManual) "[수동] " else ""} (${it.who}) ${it.costMonth}달 확인 완료"
+                    val description = if (isInvalidCost(it.cost.toInt(), bankCost)) {
+                        "$baseDescription\n$INVALID_COST_MESSAGE"
+                    } else {
+                        baseDescription
+                    }
                     val embed = EmbedUtil.create(
                         title = "넷플릭스 입금 확인",
-                        description = "${if (event.isManual) "[수동] " else ""} (${it.who}) ${it.costMonth}달 확인 완료",
+                        description = description,
                         date = convertStringToInstant(it.date)
                     )
                     channel.createMessage(embed).block()
@@ -65,11 +74,20 @@ class BankAlert(
         }
     }
 
+    private fun isInvalidCost(cost: Int, bankCost: Int): Boolean {
+        if (bankCost <= 0) return false
+        return cost % bankCost != 0
+    }
+
     private fun convertStringToInstant(date: String): Instant {
         val pattern = "yyyy-MM-dd"
         val dateTimeFormatter = DateTimeFormatter.ofPattern(pattern, Locale.KOREA)
         val localDate = LocalDate.parse(date, dateTimeFormatter)
         val zoneId = ZoneId.of("Asia/Seoul")
         return localDate.atStartOfDay(zoneId).toInstant()
+    }
+
+    companion object {
+        private const val INVALID_COST_MESSAGE = "입금 금액이 올바르지 않습니다. 다시 확인해주세요."
     }
 }

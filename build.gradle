@@ -6,6 +6,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.9.22'
     id 'org.jetbrains.kotlin.plugin.spring' version '1.9.22'
     id 'io.sentry.jvm.gradle' version "4.3.1"
+    id "org.jetbrains.kotlin.kapt" version '1.9.22'
 }
 
 group = 'me.daegyeo'
@@ -61,6 +62,7 @@ dependencies {
     implementation 'io.sentry:sentry-spring-boot-starter-jakarta:7.6.0'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
 }
 
 tasks.withType(KotlinCompile).configureEach {
