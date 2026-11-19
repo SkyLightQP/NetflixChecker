@@ -1,12 +1,12 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id 'org.springframework.boot' version '3.2.3'
-    id 'io.spring.dependency-management' version '1.1.4'
-    id 'org.jetbrains.kotlin.jvm' version '1.9.22'
-    id 'org.jetbrains.kotlin.plugin.spring' version '1.9.22'
+    id 'org.springframework.boot' version '3.5.16'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.25'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.9.25'
     id 'io.sentry.jvm.gradle' version "4.3.1"
-    id "org.jetbrains.kotlin.kapt" version '1.9.22'
+    id "org.jetbrains.kotlin.kapt" version '1.9.25'
 }
 
 group = 'me.daegyeo'
@@ -37,7 +37,7 @@ dependencies {
     implementation 'org.jetbrains.exposed:exposed-java-time:0.51.0'
     implementation 'org.postgresql:postgresql:42.7.2'
 
-    implementation 'com.discord4j:discord4j-core:3.2.5'
+    implementation 'com.discord4j:discord4j-core:3.2.10'
 
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
