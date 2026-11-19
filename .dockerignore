@@ -1,6 +1,4 @@
-.git/
-build/
-data/
-docs/
-.gradle/
-.env
+*
+!build.gradle
+!settings.gradle
+!src/

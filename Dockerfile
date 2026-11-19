@@ -1,20 +1,29 @@
+# syntax=docker/dockerfile:1
+
 FROM gradle:8.6.0-jdk21-alpine AS builder
 
+ENV GRADLE_USER_HOME=/gradle-cache
 WORKDIR /workspace
+
 COPY build.gradle settings.gradle ./
-RUN gradle build -x test --parallel --continue > /dev/null 2>&1 || true
+COPY src ./src
 
-COPY ./src /workspace/src
-RUN gradle build -x test --parallel
+RUN --mount=type=cache,target=/gradle-cache \
+    gradle bootJar --no-daemon
 
-FROM eclipse-temurin:21-alpine
+RUN java -Djarmode=tools -jar build/libs/NetflixChecker-0.0.1-SNAPSHOT.jar extract --layers --launcher --destination extracted
 
-WORKDIR /workspace
-COPY --from=builder /workspace/build/libs/NetflixChecker-0.0.1-SNAPSHOT.jar ./app.jar
+FROM eclipse-temurin:25-jre-alpine
 
 ENV TZ=Asia/Seoul
-EXPOSE 8080
+WORKDIR /workspace
 
+COPY --from=builder /workspace/extracted/dependencies/ ./
+COPY --from=builder /workspace/extracted/spring-boot-loader/ ./
+COPY --from=builder /workspace/extracted/snapshot-dependencies/ ./
+COPY --from=builder /workspace/extracted/application/ ./
+
+EXPOSE 8080
 VOLUME ["/workspace/data"]
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-XX:+UseCompactObjectHeaders", "org.springframework.boot.loader.launch.JarLauncher"]
