@@ -8,7 +8,7 @@ WORKDIR /workspace
 COPY build.gradle settings.gradle ./
 COPY src ./src
 
-RUN --mount=type=cache,target=/gradle-cache \
+RUN --mount=type=cache,target=/gradle-cache,sharing=locked \
     gradle bootJar --no-daemon
 
 RUN java -Djarmode=tools -jar build/libs/NetflixChecker-0.0.1-SNAPSHOT.jar extract --layers --launcher --destination extracted
