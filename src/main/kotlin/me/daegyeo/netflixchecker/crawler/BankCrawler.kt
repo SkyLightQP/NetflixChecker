@@ -220,7 +220,7 @@ class BankCrawler(
             val accountDetailXPath = By.xpath("//*[@id=\"M01_gen0\"]")
             delayUntilClickable(WAIT_SECONDS, accountDetailXPath)
             val accountDetail = driver.findElement(accountDetailXPath)
-            val accountDetailHtml = Jsoup.parse(accountDetail.getAttribute("innerHTML")).body()
+            val accountDetailHtml = Jsoup.parse(accountDetail.getDomProperty("innerHTML").orEmpty()).body()
             val date = accountDetailHtml.selectXpath("span[2]").text()
             val time = accountDetailHtml.selectXpath("span[4]").text()
             val cost = accountDetailHtml.selectXpath("span[10]").text()
