@@ -20,6 +20,11 @@ class BankCrawlJobListener(
     private val browserSession: BankBrowserSession,
     private val applicationEventPublisher: ApplicationEventPublisher
 ) : JobExecutionListener {
+    companion object {
+        private val KST_ZONE = ZoneId.of("Asia/Seoul")
+        private val CRAWLING_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    }
+
     private val logger = LoggerFactory.getLogger(BankCrawlJobListener::class.java)
 
     override fun beforeJob(jobExecution: JobExecution) {
@@ -76,10 +81,5 @@ class BankCrawlJobListener(
             it[key] = metricsKey.name
             it[value] = metricValue
         }
-    }
-
-    companion object {
-        private val KST_ZONE = ZoneId.of("Asia/Seoul")
-        private val CRAWLING_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     }
 }

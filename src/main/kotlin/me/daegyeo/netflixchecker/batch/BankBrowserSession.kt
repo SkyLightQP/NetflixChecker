@@ -16,6 +16,12 @@ import java.time.Duration
 class BankBrowserSession(
     private val seleniumConfiguration: SeleniumConfiguration
 ) {
+    companion object {
+        private const val DRIVER_NAME = "webdriver.chrome.driver"
+        private const val DRIVER_PATH = "chromedriver.exe"
+        private const val WAIT_SECONDS: Long = 8
+    }
+
     private val logger = LoggerFactory.getLogger(BankBrowserSession::class.java)
 
     private var driver: WebDriver? = null
@@ -64,11 +70,5 @@ class BankBrowserSession(
 
         System.setProperty(DRIVER_NAME, DRIVER_PATH)
         return ChromeDriver(option)
-    }
-
-    companion object {
-        private const val DRIVER_NAME = "webdriver.chrome.driver"
-        private const val DRIVER_PATH = "chromedriver.exe"
-        private const val WAIT_SECONDS: Long = 8
     }
 }

@@ -8,6 +8,11 @@ import java.time.LocalTime
 
 @Component
 class BankMaintenanceWindowValidator : JobParametersValidator {
+    companion object {
+        private val MAINTENANCE_START = LocalTime.of(23, 30)
+        private val MAINTENANCE_END = LocalTime.of(1, 0)
+    }
+
     override fun validate(parameters: JobParameters?) {
         val requestedAt = parameters?.getLocalDateTime(BankCrawlJobConfiguration.REQUESTED_AT)
             ?: throw JobParametersInvalidException("${BankCrawlJobConfiguration.REQUESTED_AT} 파라미터가 필요합니다.")
@@ -19,9 +24,4 @@ class BankMaintenanceWindowValidator : JobParametersValidator {
 
     private fun isMaintenanceTime(time: LocalTime): Boolean =
         !time.isBefore(MAINTENANCE_START) || time.isBefore(MAINTENANCE_END)
-
-    companion object {
-        private val MAINTENANCE_START = LocalTime.of(23, 30)
-        private val MAINTENANCE_END = LocalTime.of(1, 0)
-    }
 }

@@ -39,6 +39,12 @@ class BankCrawlJobRunner(
     private val jobRepository: JobRepository,
     private val applicationEventPublisher: ApplicationEventPublisher
 ) {
+    companion object {
+        private val KST_ZONE = ZoneId.of("Asia/Seoul")
+        private const val STALE_MINUTES = 30L
+        private const val STALE_DESCRIPTION = "stale execution"
+    }
+
     private val logger = LoggerFactory.getLogger(BankCrawlJobRunner::class.java)
 
     fun run(trigger: BankCrawlTrigger): BankCrawlRunResult =
@@ -115,11 +121,5 @@ class BankCrawlJobRunner(
             .addLocalDateTime(BankCrawlJobConfiguration.REQUESTED_AT, requestedAt, true)
             .addString(BankCrawlJobConfiguration.TRIGGER, trigger.name, false)
             .toJobParameters()
-    }
-
-    companion object {
-        private val KST_ZONE = ZoneId.of("Asia/Seoul")
-        private const val STALE_MINUTES = 30L
-        private const val STALE_DESCRIPTION = "stale execution"
     }
 }

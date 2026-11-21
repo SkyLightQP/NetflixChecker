@@ -22,6 +22,23 @@ import java.net.SocketTimeoutException
 class BankStepRetry(
     private val featureFlagConfiguration: FeatureFlagConfiguration
 ) {
+    companion object {
+        private const val INITIAL_INTERVAL_MILLIS = 2_000L
+        private const val MULTIPLIER = 2.0
+        private const val MAX_INTERVAL_MILLIS = 20_000L
+
+        private val RETRYABLE_EXCEPTIONS: Map<Class<out Throwable>, Boolean> = mapOf(
+            NoSuchSessionException::class.java to false,
+            SessionNotCreatedException::class.java to false,
+            InterruptedException::class.java to false,
+            TimeoutException::class.java to true,
+            WebDriverException::class.java to true,
+            SocketTimeoutException::class.java to true,
+            ConnectException::class.java to true,
+            IOException::class.java to true,
+        )
+    }
+
     private val logger = LoggerFactory.getLogger(BankStepRetry::class.java)
 
     fun <T> run(stepName: String, action: (isRetry: Boolean) -> T): T {
@@ -54,22 +71,5 @@ class BankStepRetry(
                 throwable.message ?: ""
             )
         }
-    }
-
-    companion object {
-        private const val INITIAL_INTERVAL_MILLIS = 2_000L
-        private const val MULTIPLIER = 2.0
-        private const val MAX_INTERVAL_MILLIS = 20_000L
-
-        private val RETRYABLE_EXCEPTIONS: Map<Class<out Throwable>, Boolean> = mapOf(
-            NoSuchSessionException::class.java to false,
-            SessionNotCreatedException::class.java to false,
-            InterruptedException::class.java to false,
-            TimeoutException::class.java to true,
-            WebDriverException::class.java to true,
-            SocketTimeoutException::class.java to true,
-            ConnectException::class.java to true,
-            IOException::class.java to true,
-        )
     }
 }

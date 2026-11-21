@@ -23,6 +23,18 @@ class BankCrawlJobConfiguration(
     private val bankStepRetry: BankStepRetry,
     private val applicationEventPublisher: ApplicationEventPublisher
 ) {
+    companion object {
+        const val JOB_NAME = "bankCrawlJob"
+        const val REQUESTED_AT = "requestedAt"
+        const val TRIGGER = "trigger"
+        const val DEPOSIT_COUNT = "depositCount"
+
+        private const val LOGIN_STEP = "bankLoginStep"
+        private const val ACCOUNT_SELECT_STEP = "bankAccountSelectStep"
+        private const val ACCOUNT_INQUIRY_STEP = "bankAccountInquiryStep"
+    }
+
+
     @Bean
     fun bankCrawlJob(
         bankMaintenanceWindowValidator: BankMaintenanceWindowValidator,
@@ -65,15 +77,4 @@ class BankCrawlJobConfiguration(
             RepeatStatus.FINISHED
         }, batchTransactionManager)
         .build()
-
-    companion object {
-        const val JOB_NAME = "bankCrawlJob"
-        const val REQUESTED_AT = "requestedAt"
-        const val TRIGGER = "trigger"
-        const val DEPOSIT_COUNT = "depositCount"
-
-        private const val LOGIN_STEP = "bankLoginStep"
-        private const val ACCOUNT_SELECT_STEP = "bankAccountSelectStep"
-        private const val ACCOUNT_INQUIRY_STEP = "bankAccountInquiryStep"
-    }
 }
