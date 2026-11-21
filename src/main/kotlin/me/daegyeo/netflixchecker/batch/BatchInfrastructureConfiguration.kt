@@ -8,7 +8,7 @@ import javax.sql.DataSource
 
 @Configuration
 class BatchInfrastructureConfiguration {
-    @Bean
+    @Bean(defaultCandidate = false)
     @BatchTransactionManager
     fun batchTransactionManager(dataSource: DataSource): DataSourceTransactionManager =
         DataSourceTransactionManager(dataSource)

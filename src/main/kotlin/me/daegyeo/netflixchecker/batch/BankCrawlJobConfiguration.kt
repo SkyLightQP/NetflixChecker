@@ -39,7 +39,7 @@ class BankCrawlJobConfiguration(
     @Bean
     fun bankLoginStep(): Step = StepBuilder(LOGIN_STEP, jobRepository)
         .tasklet({ _, _ ->
-            bankStepRetry.run(LOGIN_STEP) { bankCrawler.login(browserSession.driver()) }
+            bankStepRetry.run(LOGIN_STEP) { isRetry -> bankCrawler.login(browserSession.driver(), isRetry) }
             RepeatStatus.FINISHED
         }, batchTransactionManager)
         .build()

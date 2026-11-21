@@ -30,33 +30,45 @@ class BankCrawlJobListener(
     override fun afterJob(jobExecution: JobExecution) {
         browserSession.close()
 
-        runCatching {
-            if (jobExecution.status == BatchStatus.COMPLETED) {
-                recordCrawlSuccess()
-            } else {
-                recordCrawlFailure(jobExecution)
-            }
-        }.onFailure {
-            logger.error("은행 크롤링 Job 후처리 중 오류가 발생했습니다.", it)
+        if (jobExecution.status == BatchStatus.COMPLETED) {
+            recordCrawlSuccess()
+            return
         }
+
+        val failure = jobExecution.allFailureExceptions.firstOrNull()
+        logger.error("은행 크롤링 Job이 실패했습니다. (status={})", jobExecution.status, failure)
+        alertCrawlFailure(failure?.message ?: "")
+        recordCrawlFailure()
     }
 
     private fun recordCrawlSuccess() {
         val now = ZonedDateTime.now(KST_ZONE).format(CRAWLING_TIME_FORMATTER)
-        transaction {
-            upsertMetric(MetricsKey.LATEST_CRAWLING_STATUS, "O")
-            upsertMetric(MetricsKey.LATEST_CRAWLING_TIME, now)
+        runCatching {
+            transaction {
+                upsertMetric(MetricsKey.LATEST_CRAWLING_STATUS, "O")
+                upsertMetric(MetricsKey.LATEST_CRAWLING_TIME, now)
+            }
+        }.onFailure {
+            logger.error("은행 크롤링 성공 Metrics 갱신 중 오류가 발생했습니다.", it)
         }
     }
 
-    private fun recordCrawlFailure(jobExecution: JobExecution) {
-        val failure = jobExecution.allFailureExceptions.firstOrNull()
-        logger.error("은행 크롤링 Job이 실패했습니다. (status={})", jobExecution.status, failure)
-
-        transaction {
-            upsertMetric(MetricsKey.LATEST_CRAWLING_STATUS, "X")
+    private fun alertCrawlFailure(message: String) {
+        runCatching {
+            applicationEventPublisher.publishEvent(OccurredCrawlErrorEvent("Bank", message))
+        }.onFailure {
+            logger.error("은행 크롤링 오류 알림 발행 중 오류가 발생했습니다.", it)
         }
-        applicationEventPublisher.publishEvent(OccurredCrawlErrorEvent("Bank", failure?.message ?: ""))
+    }
+
+    private fun recordCrawlFailure() {
+        runCatching {
+            transaction {
+                upsertMetric(MetricsKey.LATEST_CRAWLING_STATUS, "X")
+            }
+        }.onFailure {
+            logger.error("은행 크롤링 실패 Metrics 갱신 중 오류가 발생했습니다.", it)
+        }
     }
 
     private fun upsertMetric(metricsKey: MetricsKey, metricValue: String) {

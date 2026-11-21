@@ -1,5 +1,6 @@
 package me.daegyeo.netflixchecker.batch
 
+import me.daegyeo.netflixchecker.event.OccurredCrawlErrorEvent
 import org.slf4j.LoggerFactory
 import org.springframework.batch.core.BatchStatus
 import org.springframework.batch.core.ExitStatus
@@ -14,6 +15,7 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException
 import org.springframework.batch.core.repository.JobRepository
 import org.springframework.batch.core.repository.JobRestartException
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -34,24 +36,14 @@ class BankCrawlJobRunner(
     private val jobLauncher: JobLauncher,
     private val bankCrawlJob: Job,
     private val jobExplorer: JobExplorer,
-    private val jobRepository: JobRepository
+    private val jobRepository: JobRepository,
+    private val applicationEventPublisher: ApplicationEventPublisher
 ) {
     private val logger = LoggerFactory.getLogger(BankCrawlJobRunner::class.java)
 
-    fun run(trigger: BankCrawlTrigger): BankCrawlRunResult {
-        val activeExecutions = failStaleExecutions(jobExplorer.findRunningJobExecutions(BankCrawlJobConfiguration.JOB_NAME))
-        if (activeExecutions.isNotEmpty()) {
-            logger.info("은행 크롤링 Job이 이미 실행 중입니다. (trigger={})", trigger)
-            return BankCrawlRunResult.AlreadyRunning
-        }
-
-        return try {
-            val jobExecution = jobLauncher.run(bankCrawlJob, jobParametersFor(trigger))
-            if (jobExecution.status == BatchStatus.COMPLETED) {
-                BankCrawlRunResult.Completed(jobExecution.executionContext.getInt(BankCrawlJobConfiguration.DEPOSIT_COUNT, 0))
-            } else {
-                BankCrawlRunResult.Failed
-            }
+    fun run(trigger: BankCrawlTrigger): BankCrawlRunResult =
+        try {
+            launchUnlessRunning(trigger)
         } catch (e: JobParametersInvalidException) {
             logger.info("은행 크롤링 Job을 시작하지 않습니다. (trigger={}, reason={})", trigger, e.message)
             BankCrawlRunResult.Maintenance
@@ -64,7 +56,24 @@ class BankCrawlJobRunner(
         } catch (e: JobRestartException) {
             logger.info("같은 회차의 은행 크롤링 Job이 이미 실행되었습니다. (trigger={})", trigger)
             BankCrawlRunResult.DuplicateRun
+        } catch (e: Exception) {
+            logger.error("은행 크롤링 Job 실행 중 오류가 발생했습니다. (trigger={})", trigger, e)
+            applicationEventPublisher.publishEvent(OccurredCrawlErrorEvent("Bank", e.message ?: ""))
+            BankCrawlRunResult.Failed
         }
+
+    private fun launchUnlessRunning(trigger: BankCrawlTrigger): BankCrawlRunResult {
+        val activeExecutions = failStaleExecutions(jobExplorer.findRunningJobExecutions(BankCrawlJobConfiguration.JOB_NAME))
+        if (activeExecutions.isNotEmpty()) {
+            logger.info("은행 크롤링 Job이 이미 실행 중입니다. (trigger={})", trigger)
+            return BankCrawlRunResult.AlreadyRunning
+        }
+
+        val jobExecution = jobLauncher.run(bankCrawlJob, jobParametersFor(trigger))
+        if (jobExecution.status != BatchStatus.COMPLETED) {
+            return BankCrawlRunResult.Failed
+        }
+        return BankCrawlRunResult.Completed(jobExecution.executionContext.getInt(BankCrawlJobConfiguration.DEPOSIT_COUNT, 0))
     }
 
     private fun failStaleExecutions(runningExecutions: Set<JobExecution>): List<JobExecution> {

@@ -27,6 +27,7 @@ class BankCrawler(
     private val featureFlagConfiguration: FeatureFlagConfiguration
 ) {
     private val BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
+    private val BLANK_PAGE_URL = "about:blank"
     private val WAIT_SECONDS: Long = 8
     private val BUTTON_WAIT_SECONDS: Long = 1
     private val DEPOSIT_DETAIL_FRAME = By.xpath("/html/body/div[7]/div[2]/div[1]/iframe")
@@ -69,14 +70,21 @@ class BankCrawler(
         }
     }
 
-    fun login(driver: WebDriver) {
+    fun login(driver: WebDriver, isRetry: Boolean) {
+        if (isRetry) {
+            driver.switchTo().defaultContent()
+            driver.manage().deleteAllCookies()
+            driver.navigate().to(BLANK_PAGE_URL)
+        }
         driver.get(BANK_URL)
 
         WebDriverWait(driver, Duration.ofSeconds(WAIT_SECONDS)).until(
             ExpectedConditions.elementToBeClickable(By.id("btn_idLogin"))
         )
 
-        driver.findElement(By.xpath("//*[@id=\"ibx_loginId\"]")).sendKeys(VaultConfiguration.BANK_SITE_ID)
+        val loginIdInput = driver.findElement(By.xpath("//*[@id=\"ibx_loginId\"]"))
+        loginIdInput.clear()
+        loginIdInput.sendKeys(VaultConfiguration.BANK_SITE_ID)
         driver.findElement(By.xpath("//*[@id=\"비밀번호\"]")).click()
 
         WebDriverWait(
@@ -102,7 +110,7 @@ class BankCrawler(
         driver.findElement(By.xpath("/html/body/div[5]/div[6]/a[3]")).click() // 보안키보드 입력 완료
         driver.findElement(By.id("btn_idLogin")).click()
 
-        delayUntilClickable(driver, BUTTON_WAIT_SECONDS, By.xpath("//*[@id=\"btn_alertLayer_yes\"]"))
+        delayUntilClickable(driver, WAIT_SECONDS, By.xpath("//*[@id=\"btn_alertLayer_yes\"]"))
 
         driver.findElement(By.xpath("//*[@id=\"btn_alertLayer_yes\"]")).click()
 
@@ -112,6 +120,7 @@ class BankCrawler(
     fun selectAccount(driver: WebDriver, isRetry: Boolean) {
         if (isRetry) {
             driver.switchTo().defaultContent()
+            driver.navigate().to(BLANK_PAGE_URL)
             driver.get(BANK_URL)
         }
 
