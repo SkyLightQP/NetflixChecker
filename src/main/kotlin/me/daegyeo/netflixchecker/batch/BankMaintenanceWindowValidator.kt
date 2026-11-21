@@ -23,5 +23,5 @@ class BankMaintenanceWindowValidator : JobParametersValidator {
     }
 
     private fun isMaintenanceTime(time: LocalTime): Boolean =
-        !time.isBefore(MAINTENANCE_START) || time.isBefore(MAINTENANCE_END)
+        !time.isBefore(MAINTENANCE_START) || !time.isAfter(MAINTENANCE_END)
 }
