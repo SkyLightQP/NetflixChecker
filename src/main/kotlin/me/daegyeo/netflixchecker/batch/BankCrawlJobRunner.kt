@@ -1,6 +1,7 @@
 package me.daegyeo.netflixchecker.batch
 
 import me.daegyeo.netflixchecker.event.OccurredCrawlErrorEvent
+import me.daegyeo.netflixchecker.shared.lock.AdvisoryLockExecutor
 import org.slf4j.LoggerFactory
 import org.springframework.batch.core.BatchStatus
 import org.springframework.batch.core.ExitStatus
@@ -37,11 +38,12 @@ class BankCrawlJobRunner(
     private val bankCrawlJob: Job,
     private val jobExplorer: JobExplorer,
     private val jobRepository: JobRepository,
-    private val bankCrawlLock: BankCrawlLock,
+    private val advisoryLockExecutor: AdvisoryLockExecutor,
     private val applicationEventPublisher: ApplicationEventPublisher
 ) {
     companion object {
         private val KST_ZONE = ZoneId.of("Asia/Seoul")
+        private const val CRAWL_LOCK_KEY = 6_158_204_771_003L
         private const val ORPHANED_DESCRIPTION = "orphaned execution"
     }
 
@@ -69,7 +71,7 @@ class BankCrawlJobRunner(
         }
 
     private fun launchUnlessRunning(trigger: BankCrawlTrigger): BankCrawlRunResult =
-        bankCrawlLock.runExclusively { launch(trigger) } ?: run {
+        advisoryLockExecutor.runExclusively(CRAWL_LOCK_KEY) { launch(trigger) } ?: run {
             logger.info("은행 크롤링 Job이 이미 실행 중입니다. (trigger={})", trigger)
             BankCrawlRunResult.AlreadyRunning
         }

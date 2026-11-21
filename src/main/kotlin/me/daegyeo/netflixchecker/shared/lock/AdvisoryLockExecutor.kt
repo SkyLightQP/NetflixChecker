@@ -1,4 +1,4 @@
-package me.daegyeo.netflixchecker.batch
+package me.daegyeo.netflixchecker.shared.lock
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -6,42 +6,38 @@ import java.sql.Connection
 import javax.sql.DataSource
 
 @Component
-class BankCrawlLock(
+class AdvisoryLockExecutor(
     private val dataSource: DataSource
 ) {
-    companion object {
-        private const val LOCK_KEY = 6_158_204_771_003L
-    }
+    private val logger = LoggerFactory.getLogger(AdvisoryLockExecutor::class.java)
 
-    private val logger = LoggerFactory.getLogger(BankCrawlLock::class.java)
-
-    fun <T> runExclusively(action: () -> T): T? =
+    fun <T> runExclusively(lockKey: Long, action: () -> T): T? =
         dataSource.connection.use { connection ->
-            if (!tryLock(connection)) {
+            if (!tryLock(connection, lockKey)) {
                 return null
             }
 
             try {
                 action()
             } finally {
-                unlock(connection)
+                unlock(connection, lockKey)
             }
         }
 
-    private fun tryLock(connection: Connection): Boolean =
+    private fun tryLock(connection: Connection, lockKey: Long): Boolean =
         connection.prepareStatement("SELECT pg_try_advisory_lock(?)").use { statement ->
-            statement.setLong(1, LOCK_KEY)
+            statement.setLong(1, lockKey)
             statement.executeQuery().use { it.next() && it.getBoolean(1) }
         }
 
-    private fun unlock(connection: Connection) {
+    private fun unlock(connection: Connection, lockKey: Long) {
         runCatching {
             connection.prepareStatement("SELECT pg_advisory_unlock(?)").use { statement ->
-                statement.setLong(1, LOCK_KEY)
+                statement.setLong(1, lockKey)
                 statement.executeQuery().close()
             }
         }.onFailure {
-            logger.warn("은행 크롤링 잠금 해제 중 오류가 발생했습니다. 연결이 닫히면 잠금도 함께 풀립니다.", it)
+            logger.warn("Advisory lock 해제 중 오류가 발생했습니다. (lockKey={})", lockKey, it)
         }
     }
 }
