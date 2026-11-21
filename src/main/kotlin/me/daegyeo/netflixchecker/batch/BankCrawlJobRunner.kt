@@ -37,12 +37,12 @@ class BankCrawlJobRunner(
     private val bankCrawlJob: Job,
     private val jobExplorer: JobExplorer,
     private val jobRepository: JobRepository,
+    private val bankCrawlLock: BankCrawlLock,
     private val applicationEventPublisher: ApplicationEventPublisher
 ) {
     companion object {
         private val KST_ZONE = ZoneId.of("Asia/Seoul")
-        private const val STALE_MINUTES = 30L
-        private const val STALE_DESCRIPTION = "stale execution"
+        private const val ORPHANED_DESCRIPTION = "orphaned execution"
     }
 
     private val logger = LoggerFactory.getLogger(BankCrawlJobRunner::class.java)
@@ -68,12 +68,14 @@ class BankCrawlJobRunner(
             BankCrawlRunResult.Failed
         }
 
-    private fun launchUnlessRunning(trigger: BankCrawlTrigger): BankCrawlRunResult {
-        val activeExecutions = failStaleExecutions(jobExplorer.findRunningJobExecutions(BankCrawlJobConfiguration.JOB_NAME))
-        if (activeExecutions.isNotEmpty()) {
+    private fun launchUnlessRunning(trigger: BankCrawlTrigger): BankCrawlRunResult =
+        bankCrawlLock.runExclusively { launch(trigger) } ?: run {
             logger.info("은행 크롤링 Job이 이미 실행 중입니다. (trigger={})", trigger)
-            return BankCrawlRunResult.AlreadyRunning
+            BankCrawlRunResult.AlreadyRunning
         }
+
+    private fun launch(trigger: BankCrawlTrigger): BankCrawlRunResult {
+        jobExplorer.findRunningJobExecutions(BankCrawlJobConfiguration.JOB_NAME).forEach(::markAsOrphaned)
 
         val jobExecution = jobLauncher.run(bankCrawlJob, jobParametersFor(trigger))
         if (jobExecution.status != BatchStatus.COMPLETED) {
@@ -82,35 +84,25 @@ class BankCrawlJobRunner(
         return BankCrawlRunResult.Completed(jobExecution.executionContext.getInt(BankCrawlJobConfiguration.DEPOSIT_COUNT, 0))
     }
 
-    private fun failStaleExecutions(runningExecutions: Set<JobExecution>): List<JobExecution> {
-        val staleThreshold = LocalDateTime.now().minusMinutes(STALE_MINUTES)
-        val (staleExecutions, activeExecutions) = runningExecutions.partition {
-            (it.startTime ?: it.createTime).isBefore(staleThreshold)
-        }
-
-        staleExecutions.forEach(::markAsFailed)
-        return activeExecutions
-    }
-
-    private fun markAsFailed(jobExecution: JobExecution) {
+    private fun markAsOrphaned(jobExecution: JobExecution) {
         val now = LocalDateTime.now()
-        val staleExitStatus = ExitStatus.FAILED.addExitDescription(STALE_DESCRIPTION)
+        val orphanedExitStatus = ExitStatus.FAILED.addExitDescription(ORPHANED_DESCRIPTION)
 
         jobExecution.stepExecutions
             .filter { it.status.isRunning }
             .forEach {
                 it.status = BatchStatus.FAILED
-                it.exitStatus = staleExitStatus
+                it.exitStatus = orphanedExitStatus
                 it.setEndTime(now)
                 jobRepository.update(it)
             }
 
         jobExecution.status = BatchStatus.FAILED
-        jobExecution.exitStatus = staleExitStatus
+        jobExecution.exitStatus = orphanedExitStatus
         jobExecution.setEndTime(now)
         jobRepository.update(jobExecution)
 
-        logger.warn("오래 실행 중인 은행 크롤링 Job을 실패 처리했습니다. (executionId={}, startTime={})", jobExecution.id, jobExecution.startTime)
+        logger.warn("중단된 채 남아 있던 은행 크롤링 Job을 실패 처리했습니다. (executionId={}, startTime={})", jobExecution.id, jobExecution.startTime)
     }
 
     private fun jobParametersFor(trigger: BankCrawlTrigger): JobParameters {
