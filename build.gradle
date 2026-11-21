@@ -31,13 +31,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
     implementation 'org.jetbrains.exposed:exposed-spring-boot-starter:0.51.0'
     implementation 'org.jetbrains.exposed:exposed-java-time:0.51.0'
     implementation 'org.postgresql:postgresql:42.7.2'
 
-    implementation 'com.discord4j:discord4j-core:3.2.10'
+    implementation 'com.discord4j:discord4j-core:3.3.3'
 
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'

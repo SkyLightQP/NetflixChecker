@@ -4,6 +4,11 @@ spring:
       - config.yaml
   exposed:
     generate-ddl: false
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: never
   datasource:
     url: ${DATABASE_URL}
     driver-class-name: org.postgresql.Driver
