@@ -31,6 +31,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
     implementation 'org.jetbrains.exposed:exposed-spring-boot-starter:0.51.0'
