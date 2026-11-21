@@ -54,6 +54,8 @@ class BankCrawler(
     private val BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
     private val WAIT_SECONDS: Long = 8
     private val BUTTON_WAIT_SECONDS: Long = 1
+    private val DEPOSIT_DETAIL_FRAME = By.xpath("/html/body/div[7]/div[2]/div[1]/iframe")
+    private val DEPOSIT_LIST_BUTTON = By.xpath("//*[@id=\"btn_목록보기\"]")
 
     private var driver: WebDriver? = null
 
@@ -105,11 +107,10 @@ class BankCrawler(
         }
     }
 
-    private fun delayUntilClickable(seconds: Long, locator: By) =
-        WebDriverWait(requireDriver(), Duration.ofSeconds(seconds)).until(ExpectedConditions.elementToBeClickable(locator))
+    private fun delayUntilClickable(driver: WebDriver, seconds: Long, locator: By) =
+        WebDriverWait(driver, Duration.ofSeconds(seconds)).until(ExpectedConditions.elementToBeClickable(locator))
 
-    private fun clickSecureButton(buttonType: ButtonType, value: String) {
-        val driver = requireDriver()
+    private fun clickSecureButton(driver: WebDriver, buttonType: ButtonType, value: String) {
         val keyXPath = By.xpath("//a[@aria-label='$value']")
         val uppercaseKeyXPath = By.xpath("//a[@aria-label='대문자${value.uppercase()}']")
         val specialKeyXPath = By.xpath("//a[@aria-label='특수키']")
@@ -117,32 +118,32 @@ class BankCrawler(
 
         when (buttonType) {
             ButtonType.SHIFT -> {
-                delayUntilClickable(BUTTON_WAIT_SECONDS, shiftKeyXPath)
+                delayUntilClickable(driver, BUTTON_WAIT_SECONDS, shiftKeyXPath)
                 driver.findElement(shiftKeyXPath).click()
-                delayUntilClickable(BUTTON_WAIT_SECONDS, uppercaseKeyXPath)
+                delayUntilClickable(driver, BUTTON_WAIT_SECONDS, uppercaseKeyXPath)
                 driver.findElement(uppercaseKeyXPath).click()
-                delayUntilClickable(BUTTON_WAIT_SECONDS, shiftKeyXPath)
+                delayUntilClickable(driver, BUTTON_WAIT_SECONDS, shiftKeyXPath)
                 driver.findElement(shiftKeyXPath).click()
             }
 
             ButtonType.CHAR -> {
-                delayUntilClickable(BUTTON_WAIT_SECONDS, specialKeyXPath)
+                delayUntilClickable(driver, BUTTON_WAIT_SECONDS, specialKeyXPath)
                 driver.findElement(specialKeyXPath).click()
-                delayUntilClickable(BUTTON_WAIT_SECONDS, keyXPath)
+                delayUntilClickable(driver, BUTTON_WAIT_SECONDS, keyXPath)
                 driver.findElement(keyXPath).click()
-                delayUntilClickable(BUTTON_WAIT_SECONDS, specialKeyXPath)
+                delayUntilClickable(driver, BUTTON_WAIT_SECONDS, specialKeyXPath)
                 driver.findElement(specialKeyXPath).click()
             }
 
             ButtonType.NORMAL -> {
-                delayUntilClickable(BUTTON_WAIT_SECONDS, keyXPath)
+                delayUntilClickable(driver, BUTTON_WAIT_SECONDS, keyXPath)
                 driver.findElement(keyXPath).click()
             }
         }
     }
 
-    private fun loginBank() {
-        val driver = requireDriver()
+    fun login(driver: WebDriver) {
+        driver.get(BANK_URL)
 
         WebDriverWait(driver, Duration.ofSeconds(WAIT_SECONDS)).until(
             ExpectedConditions.elementToBeClickable(By.id("btn_idLogin"))
@@ -160,29 +161,32 @@ class BankCrawler(
                 delay((BUTTON_WAIT_SECONDS * 1000).milliseconds)
             }
             when {
-                it.isUpperCase() -> clickSecureButton(ButtonType.SHIFT, it.toString())
-                it == '*' -> clickSecureButton(ButtonType.CHAR, "별표")
-                it == '!' -> clickSecureButton(ButtonType.CHAR, "느낌표")
-                it == '?' -> clickSecureButton(ButtonType.CHAR, "물음표")
-                it == '~' -> clickSecureButton(ButtonType.CHAR, "물결표시")
-                it == '#' -> clickSecureButton(ButtonType.CHAR, "우물정")
-                it == '@' -> clickSecureButton(ButtonType.CHAR, "골뱅이")
-                else -> clickSecureButton(ButtonType.NORMAL, it.toString())
+                it.isUpperCase() -> clickSecureButton(driver, ButtonType.SHIFT, it.toString())
+                it == '*' -> clickSecureButton(driver, ButtonType.CHAR, "별표")
+                it == '!' -> clickSecureButton(driver, ButtonType.CHAR, "느낌표")
+                it == '?' -> clickSecureButton(driver, ButtonType.CHAR, "물음표")
+                it == '~' -> clickSecureButton(driver, ButtonType.CHAR, "물결표시")
+                it == '#' -> clickSecureButton(driver, ButtonType.CHAR, "우물정")
+                it == '@' -> clickSecureButton(driver, ButtonType.CHAR, "골뱅이")
+                else -> clickSecureButton(driver, ButtonType.NORMAL, it.toString())
             }
         }
 
         driver.findElement(By.xpath("/html/body/div[5]/div[6]/a[3]")).click() // 보안키보드 입력 완료
         driver.findElement(By.id("btn_idLogin")).click()
 
-        delayUntilClickable(BUTTON_WAIT_SECONDS, By.xpath("//*[@id=\"btn_alertLayer_yes\"]"))
+        delayUntilClickable(driver, BUTTON_WAIT_SECONDS, By.xpath("//*[@id=\"btn_alertLayer_yes\"]"))
 
         driver.findElement(By.xpath("//*[@id=\"btn_alertLayer_yes\"]")).click()
 
         logger.info("은행 로그인을 완료했습니다.")
     }
 
-    private fun selectBankAccount() {
-        val driver = requireDriver()
+    fun selectAccount(driver: WebDriver, isRetry: Boolean) {
+        if (isRetry) {
+            driver.switchTo().defaultContent()
+            driver.get(BANK_URL)
+        }
 
         driver.findElement(By.xpath("//*[@class=\"w2textbox mt5\"]")).click()
         driver.findElement(By.xpath("//*[@id=\"sbx_accno_input_0\"]/option[2]")).click()
@@ -197,7 +201,7 @@ class BankCrawler(
             runBlocking {
                 delay((BUTTON_WAIT_SECONDS * 1000).milliseconds)
             }
-            clickSecureButton(ButtonType.NORMAL, it.toString())
+            clickSecureButton(driver, ButtonType.NORMAL, it.toString())
         }
 
         driver.findElement(By.xpath("//*[@id=\"wfr_searchCalendar_rad_gigan\"]/div[3]")).click()
@@ -206,19 +210,31 @@ class BankCrawler(
         logger.info("은행 계좌를 찾았습니다.")
     }
 
-    private fun getAccountData(): List<AccountData> {
-        val driver = requireDriver()
+    private fun closeDepositDetailIfOpen(driver: WebDriver) {
+        driver.switchTo().defaultContent()
+        val detailFrame = driver.findElements(DEPOSIT_DETAIL_FRAME).firstOrNull { it.isDisplayed } ?: return
+
+        driver.switchTo().frame(detailFrame)
+        driver.findElements(DEPOSIT_LIST_BUTTON).firstOrNull()?.click()
+        driver.switchTo().defaultContent()
+    }
+
+    fun readDeposits(driver: WebDriver, isRetry: Boolean): List<AccountData> {
+        if (isRetry) {
+            closeDepositDetailIfOpen(driver)
+        }
+
         val result = arrayListOf<AccountData>()
         val original = driver.findElements(By.cssSelector("#F01_grd_list_body_tbody > tr"))
 
         for (i in 0 until original.size) {
             val elementXPath = By.xpath("//*[@id=\"F01_grd_list_cell_${i}_11\"]/nobr/a")
-            delayUntilClickable(BUTTON_WAIT_SECONDS, elementXPath)
+            delayUntilClickable(driver, BUTTON_WAIT_SECONDS, elementXPath)
             driver.findElement(elementXPath).click()
 
-            driver.switchTo().frame(driver.findElement(By.xpath("/html/body/div[7]/div[2]/div[1]/iframe")))
+            driver.switchTo().frame(driver.findElement(DEPOSIT_DETAIL_FRAME))
             val accountDetailXPath = By.xpath("//*[@id=\"M01_gen0\"]")
-            delayUntilClickable(WAIT_SECONDS, accountDetailXPath)
+            delayUntilClickable(driver, WAIT_SECONDS, accountDetailXPath)
             val accountDetail = driver.findElement(accountDetailXPath)
             val accountDetailHtml = Jsoup.parse(accountDetail.getDomProperty("innerHTML").orEmpty()).body()
             val date = accountDetailHtml.selectXpath("span[2]").text()
@@ -237,7 +253,7 @@ class BankCrawler(
                 result.add(AccountData(time, date, normalizeCost.toString(), who, costMonth))
             }
 
-            driver.findElement(By.xpath("//*[@id=\"btn_목록보기\"]")).click()
+            driver.findElement(DEPOSIT_LIST_BUTTON).click()
             driver.switchTo().defaultContent()
         }
 
@@ -285,10 +301,10 @@ class BankCrawler(
                     openBrowser()
                 }
 
-                requireDriver().get(BANK_URL)
-                loginBank()
-                selectBankAccount()
-                getAccountData()
+                val currentDriver = requireDriver()
+                login(currentDriver)
+                selectAccount(currentDriver, isRetry = false)
+                readDeposits(currentDriver, isRetry = false)
             }
 
             transaction {
