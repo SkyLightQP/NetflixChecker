@@ -66,9 +66,17 @@ class BankCrawlJobRunner(
             BankCrawlRunResult.DuplicateRun
         } catch (e: Exception) {
             logger.error("은행 크롤링 Job 실행 중 오류가 발생했습니다. (trigger={})", trigger, e)
-            applicationEventPublisher.publishEvent(OccurredCrawlErrorEvent("Bank", e.message ?: ""))
+            alertCrawlFailure(e.message ?: "")
             BankCrawlRunResult.Failed
         }
+
+    private fun alertCrawlFailure(message: String) {
+        runCatching {
+            applicationEventPublisher.publishEvent(OccurredCrawlErrorEvent("Bank", message))
+        }.onFailure {
+            logger.error("은행 크롤링 오류 알림 발행 중 오류가 발생했습니다.", it)
+        }
+    }
 
     private fun launchUnlessRunning(trigger: BankCrawlTrigger): BankCrawlRunResult =
         advisoryLockExecutor.runExclusively(CRAWL_LOCK_KEY) { launch(trigger) } ?: run {
