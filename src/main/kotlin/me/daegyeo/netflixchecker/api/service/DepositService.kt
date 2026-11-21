@@ -1,7 +1,8 @@
 package me.daegyeo.netflixchecker.api.service
 
 import me.daegyeo.netflixchecker.api.dto.DepositLogDTO
-import me.daegyeo.netflixchecker.crawler.BankCrawler
+import me.daegyeo.netflixchecker.batch.BankCrawlJobRunner
+import me.daegyeo.netflixchecker.batch.BankCrawlTrigger
 import me.daegyeo.netflixchecker.data.AccountData
 import me.daegyeo.netflixchecker.entity.DepositLog
 import me.daegyeo.netflixchecker.event.CompletedBankCrawlEvent
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class DepositService(
-    private val bankCrawler: BankCrawler,
+    private val bankCrawlJobRunner: BankCrawlJobRunner,
     private val applicationEventPublisher: ApplicationEventPublisher
 ) {
 
@@ -23,11 +24,8 @@ class DepositService(
     fun crawlBankManually() {
         logger.info("API를 통해 크롤링을 시작합니다.")
 
-        bankCrawler.openBrowser()
-        val result = bankCrawler.crawl()
-        bankCrawler.closeBrowser()
-
-        applicationEventPublisher.publishEvent(CompletedBankCrawlEvent(result))
+        val result = bankCrawlJobRunner.run(BankCrawlTrigger.API)
+        logger.info("API를 통한 크롤링을 마쳤습니다. (result={})", result)
     }
 
     fun getDepositors(): List<DepositLogDTO> {

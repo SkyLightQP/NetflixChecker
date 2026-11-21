@@ -3,38 +3,17 @@ package me.daegyeo.netflixchecker.crawler
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import me.daegyeo.netflixchecker.config.FeatureFlagConfiguration
-import me.daegyeo.netflixchecker.config.SeleniumConfiguration
 import me.daegyeo.netflixchecker.config.VaultConfiguration
 import me.daegyeo.netflixchecker.data.AccountData
 import me.daegyeo.netflixchecker.enum.FeatureFlagKey
-import me.daegyeo.netflixchecker.enum.MetricsKey
-import me.daegyeo.netflixchecker.event.OccurredCrawlErrorEvent
-import me.daegyeo.netflixchecker.shared.retry.RetryExecutor
-import me.daegyeo.netflixchecker.shared.retry.RetryPolicy
-import me.daegyeo.netflixchecker.table.Metrics
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.upsert
 import org.jsoup.Jsoup
 import org.openqa.selenium.By
-import org.openqa.selenium.TimeoutException
 import org.openqa.selenium.WebDriver
-import org.openqa.selenium.WebDriverException
-import org.openqa.selenium.chrome.ChromeDriver
-import org.openqa.selenium.chrome.ChromeOptions
-import org.openqa.selenium.remote.RemoteWebDriver
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
-import java.io.IOException
-import java.net.ConnectException
-import java.net.URI
-import java.net.SocketTimeoutException
 import java.time.Duration
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import kotlin.math.round
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -45,67 +24,15 @@ enum class ButtonType {
 
 @Component
 class BankCrawler(
-    private val seleniumConfiguration: SeleniumConfiguration,
-    private val applicationEventPublisher: ApplicationEventPublisher,
     private val featureFlagConfiguration: FeatureFlagConfiguration
 ) {
-    private val DRIVER_NAME = "webdriver.chrome.driver"
-    private val DRIVER_PATH = "chromedriver.exe"
     private val BANK_URL = "https://bank.shinhan.com/rib/easy/index.jsp#210000000000"
     private val WAIT_SECONDS: Long = 8
     private val BUTTON_WAIT_SECONDS: Long = 1
     private val DEPOSIT_DETAIL_FRAME = By.xpath("/html/body/div[7]/div[2]/div[1]/iframe")
     private val DEPOSIT_LIST_BUTTON = By.xpath("//*[@id=\"btn_목록보기\"]")
 
-    private var driver: WebDriver? = null
-
     private val logger = LoggerFactory.getLogger(BankCrawler::class.java)
-
-    private fun requireDriver(): WebDriver = driver ?: error("Browser is not open.")
-
-    fun openBrowser() {
-        closeBrowser()
-
-        val isRemote = seleniumConfiguration.useRemote
-        val option = ChromeOptions()
-        if (seleniumConfiguration.useHeadless) {
-            option.addArguments("--headless=new")
-            option.addArguments("--disable-gpu")
-        }
-
-        val mobileEmulation = hashMapOf("deviceName" to "Samsung Galaxy S20 Ultra")
-        option.setExperimentalOption("mobileEmulation", mobileEmulation)
-
-        val createdDriver = if (!isRemote) {
-            System.setProperty(DRIVER_NAME, DRIVER_PATH)
-            ChromeDriver(option)
-        } else {
-            RemoteWebDriver(URI(seleniumConfiguration.host).toURL(), option)
-        }
-
-        try {
-            createdDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(WAIT_SECONDS))
-            driver = createdDriver
-        } catch (e: Exception) {
-            runCatching {
-                createdDriver.quit()
-            }.onFailure {
-                logger.warn("브라우저 초기화 실패 후 정리 중 오류가 발생했습니다.", it)
-            }
-            throw e
-        }
-    }
-
-    fun closeBrowser() {
-        val currentDriver = driver ?: return
-        driver = null
-
-        runCatching {
-            currentDriver.quit()
-        }.onFailure {
-            logger.warn("브라우저 종료 중 오류가 발생했습니다.", it)
-        }
-    }
 
     private fun delayUntilClickable(driver: WebDriver, seconds: Long, locator: By) =
         WebDriverWait(driver, Duration.ofSeconds(seconds)).until(ExpectedConditions.elementToBeClickable(locator))
@@ -264,90 +191,5 @@ class BankCrawler(
         }
 
         return result
-    }
-
-    fun crawl(): List<AccountData> {
-        val formatter = DateTimeFormatter
-            .ofPattern("yyyy-MM-dd HH:mm:ss")
-            .withZone(ZoneId.of("Asia/Seoul"))
-
-        val retryPolicy = RetryPolicy(
-            maxAttempts = featureFlagConfiguration.getInt(FeatureFlagKey.MAX_RETRY_COUNT).coerceAtLeast(1),
-            initialDelayMillis = 2_000,
-            multiplier = 2.0,
-            maxDelayMillis = 20_000,
-            jitterMillis = 1_000,
-            shouldRetry = ::isRetryableException,
-            onRetry = {
-                logger.warn(
-                    "은행 크롤링 재시도({}/{}) - nextDelay={}ms, operation={}, exception={}({})",
-                    it.attempt,
-                    it.maxAttempts,
-                    it.nextDelayMillis,
-                    it.operationName,
-                    it.throwable.javaClass.simpleName,
-                    it.throwable.message ?: ""
-                )
-                closeBrowser()
-            }
-        )
-
-        try {
-            val result = RetryExecutor.run(
-                policy = retryPolicy,
-                operationName = "bank-crawler.crawl"
-            ) {
-                if (driver == null) {
-                    openBrowser()
-                }
-
-                val currentDriver = requireDriver()
-                login(currentDriver)
-                selectAccount(currentDriver, isRetry = false)
-                readDeposits(currentDriver, isRetry = false)
-            }
-
-            transaction {
-                Metrics.upsert(Metrics.key, where = { Metrics.key eq MetricsKey.LATEST_CRAWLING_STATUS.name }) {
-                    it[key] = MetricsKey.LATEST_CRAWLING_STATUS.name
-                    it[value] = "O"
-                }
-                Metrics.upsert(Metrics.key, where = { Metrics.key eq MetricsKey.LATEST_CRAWLING_TIME.name }) {
-                    it[key] = MetricsKey.LATEST_CRAWLING_TIME.name
-                    it[value] = LocalDateTime.now().format(formatter)
-                }
-            }
-            return result
-        } catch (e: Exception) {
-            logger.error("은행 크롤링 중 오류가 발생했습니다. 브라우저를 닫습니다.", e)
-            applicationEventPublisher.publishEvent(OccurredCrawlErrorEvent("Bank", e.message ?: ""))
-            closeBrowser()
-            transaction {
-                Metrics.upsert(Metrics.key, where = { Metrics.key eq MetricsKey.LATEST_CRAWLING_STATUS.name }) {
-                    it[key] = MetricsKey.LATEST_CRAWLING_STATUS.name
-                    it[value] = "X"
-                }
-            }
-            return emptyList()
-        }
-    }
-
-    private fun isRetryableException(throwable: Throwable): Boolean {
-        if (throwable is InterruptedException) {
-            Thread.currentThread().interrupt()
-            return false
-        }
-
-        if (throwable is TimeoutException ||
-            throwable is WebDriverException ||
-            throwable is SocketTimeoutException ||
-            throwable is ConnectException ||
-            throwable is IOException
-        ) {
-            return true
-        }
-
-        val cause = throwable.cause ?: return false
-        return isRetryableException(cause)
     }
 }
