@@ -1,6 +1,8 @@
 package me.daegyeo.netflixchecker.batch
 
+import me.daegyeo.netflixchecker.data.AccountData
 import me.daegyeo.netflixchecker.enum.MetricsKey
+import me.daegyeo.netflixchecker.event.CompletedBankCrawlEvent
 import me.daegyeo.netflixchecker.event.OccurredCrawlErrorEvent
 import me.daegyeo.netflixchecker.table.Metrics
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -18,6 +20,7 @@ import java.time.format.DateTimeFormatter
 @Component
 class BankCrawlJobListener(
     private val browserSession: BankBrowserSession,
+    private val bankCrawlResult: BankCrawlResult,
     private val applicationEventPublisher: ApplicationEventPublisher
 ) : JobExecutionListener {
     companion object {
@@ -37,6 +40,7 @@ class BankCrawlJobListener(
 
         if (jobExecution.status == BatchStatus.COMPLETED) {
             recordCrawlSuccess()
+            alertDeposits(bankCrawlResult.deposits)
             return
         }
 
@@ -55,6 +59,15 @@ class BankCrawlJobListener(
             }
         }.onFailure {
             logger.error("은행 크롤링 성공 Metrics 갱신 중 오류가 발생했습니다.", it)
+        }
+    }
+
+    private fun alertDeposits(deposits: List<AccountData>) {
+        runCatching {
+            applicationEventPublisher.publishEvent(CompletedBankCrawlEvent(deposits))
+        }.onFailure {
+            logger.error("은행 입금 알림 발송 중 오류가 발생했습니다.", it)
+            alertCrawlFailure("입금 알림 발송 실패: ${it.message ?: ""}")
         }
     }
 

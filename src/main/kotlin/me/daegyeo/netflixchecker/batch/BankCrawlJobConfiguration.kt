@@ -1,7 +1,6 @@
 package me.daegyeo.netflixchecker.batch
 
 import me.daegyeo.netflixchecker.crawler.BankCrawler
-import me.daegyeo.netflixchecker.event.CompletedBankCrawlEvent
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.job.builder.JobBuilder
@@ -9,7 +8,6 @@ import org.springframework.batch.core.repository.JobRepository
 import org.springframework.batch.core.step.builder.StepBuilder
 import org.springframework.batch.repeat.RepeatStatus
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.transaction.PlatformTransactionManager
@@ -21,7 +19,7 @@ class BankCrawlJobConfiguration(
     private val bankCrawler: BankCrawler,
     private val browserSession: BankBrowserSession,
     private val bankStepRetry: BankStepRetry,
-    private val applicationEventPublisher: ApplicationEventPublisher
+    private val bankCrawlResult: BankCrawlResult
 ) {
     companion object {
         const val JOB_NAME = "bankCrawlJob"
@@ -33,7 +31,6 @@ class BankCrawlJobConfiguration(
         private const val ACCOUNT_SELECT_STEP = "bankAccountSelectStep"
         private const val ACCOUNT_INQUIRY_STEP = "bankAccountInquiryStep"
     }
-
 
     @Bean
     fun bankCrawlJob(
@@ -72,8 +69,8 @@ class BankCrawlJobConfiguration(
             val deposits = bankStepRetry.run(ACCOUNT_INQUIRY_STEP) { isRetry ->
                 bankCrawler.readDeposits(browserSession.driver(), isRetry)
             }
+            bankCrawlResult.record(deposits)
             chunkContext.stepContext.stepExecution.jobExecution.executionContext.putInt(DEPOSIT_COUNT, deposits.size)
-            applicationEventPublisher.publishEvent(CompletedBankCrawlEvent(deposits))
             RepeatStatus.FINISHED
         }, batchTransactionManager)
         .build()
