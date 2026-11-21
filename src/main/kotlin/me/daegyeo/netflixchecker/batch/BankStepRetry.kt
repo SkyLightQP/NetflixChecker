@@ -2,8 +2,6 @@ package me.daegyeo.netflixchecker.batch
 
 import me.daegyeo.netflixchecker.config.FeatureFlagConfiguration
 import me.daegyeo.netflixchecker.enum.FeatureFlagKey
-import org.openqa.selenium.NoSuchSessionException
-import org.openqa.selenium.SessionNotCreatedException
 import org.openqa.selenium.TimeoutException
 import org.openqa.selenium.WebDriverException
 import org.slf4j.LoggerFactory
@@ -28,8 +26,6 @@ class BankStepRetry(
         private const val MAX_INTERVAL_MILLIS = 20_000L
 
         private val RETRYABLE_EXCEPTIONS: Map<Class<out Throwable>, Boolean> = mapOf(
-            NoSuchSessionException::class.java to false,
-            SessionNotCreatedException::class.java to false,
             InterruptedException::class.java to false,
             TimeoutException::class.java to true,
             WebDriverException::class.java to true,

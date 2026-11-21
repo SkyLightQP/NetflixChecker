@@ -117,13 +117,7 @@ class BankCrawler(
         logger.info("은행 로그인을 완료했습니다.")
     }
 
-    fun selectAccount(driver: WebDriver, isRetry: Boolean) {
-        if (isRetry) {
-            driver.switchTo().defaultContent()
-            driver.navigate().to(BLANK_PAGE_URL)
-            driver.get(BANK_URL)
-        }
-
+    fun selectAccount(driver: WebDriver) {
         driver.findElement(By.xpath("//*[@class=\"w2textbox mt5\"]")).click()
         driver.findElement(By.xpath("//*[@id=\"sbx_accno_input_0\"]/option[2]")).click()
 

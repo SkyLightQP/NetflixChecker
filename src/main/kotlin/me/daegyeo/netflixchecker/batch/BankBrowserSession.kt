@@ -45,6 +45,11 @@ class BankBrowserSession(
 
     fun driver(): WebDriver = driver ?: error("Browser is not open.")
 
+    fun isDisconnected(): Boolean {
+        val currentDriver = driver ?: return true
+        return runCatching { currentDriver.windowHandle }.isFailure
+    }
+
     fun close() {
         val currentDriver = driver ?: return
         driver = null
